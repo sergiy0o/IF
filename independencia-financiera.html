@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Independencia Financiera</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f14;
+    --bg2: #13161e;
+    --bg3: #1a1e2a;
+    --bg4: #212636;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #f0f1f5;
+    --text2: #8a8fa8;
+    --text3: #5a5f78;
+    --accent: #6ee7b7;
+    --accent2: #34d399;
+    --accent-dim: rgba(110,231,183,0.12);
+    --accent-dim2: rgba(110,231,183,0.06);
+    --gold: #fbbf24;
+    --gold-dim: rgba(251,191,36,0.12);
+    --red: #f87171;
+    --red-dim: rgba(248,113,113,0.10);
+    --blue: #60a5fa;
+    --blue-dim: rgba(96,165,250,0.10);
+    --purple: #a78bfa;
+    --purple-dim: rgba(167,139,250,0.10);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  .noise {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    opacity: 0.4;
+  }
+
+  .glow-orb {
+    position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+    filter: blur(120px); opacity: 0.15;
+  }
+  .glow-orb.g1 { width: 600px; height: 600px; top: -200px; right: -100px; background: var(--accent); }
+  .glow-orb.g2 { width: 400px; height: 400px; bottom: -100px; left: -100px; background: var(--purple); }
+
+  .container {
+    position: relative; z-index: 1;
+    max-width: 1100px; margin: 0 auto; padding: 0 24px 80px;
+  }
+
+  header {
+    padding: 60px 0 48px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+
+  .header-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--accent2); margin-bottom: 16px;
+  }
+  .header-label::before {
+    content: ''; display: block; width: 20px; height: 1px; background: var(--accent2);
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .header-sub {
+    font-size: 16px; color: var(--text2); max-width: 560px; font-weight: 300;
+  }
+
+  .grid-main {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  @media (max-width: 860px) {
+    .grid-main { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+  }
+
+  .panel-title {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text3); margin-bottom: 24px;
+  }
+
+  .field { margin-bottom: 20px; }
+  .field:last-child { margin-bottom: 0; }
+
+  .field label {
+    display: block; font-size: 13px; font-weight: 500;
+    color: var(--text2); margin-bottom: 8px;
+  }
+
+  .input-wrap {
+    position: relative;
+  }
+
+  .input-prefix {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    font-size: 14px; color: var(--text3); font-family: 'DM Mono', monospace;
+    pointer-events: none;
+  }
+
+  input[type="number"] {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    padding: 11px 14px 11px 34px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -moz-appearance: textfield;
+  }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  input[type="number"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+
+  .field-suffix {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .field-suffix input { flex: 1; }
+  .field-unit {
+    font-size: 12px; color: var(--text3); white-space: nowrap; font-weight: 500;
+  }
+
+  .divider {
+    height: 1px; background: var(--border); margin: 24px 0;
+  }
+
+  .fixed-params {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+
+  .param-chip {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .param-chip .chip-label {
+    font-size: 11px; color: var(--text3); margin-bottom: 4px;
+  }
+  .param-chip .chip-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 15px; font-weight: 500; color: var(--accent);
+  }
+
+  .right-col { display: flex; flex-direction: column; gap: 24px; }
+
+  .metrics-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+  }
+
+  @media (max-width: 600px) {
+    .metrics-grid { grid-template-columns: 1fr; }
+  }
+
+  .metric-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    transition: border-color 0.3s;
+  }
+  .metric-card.highlight {
+    border-color: rgba(110,231,183,0.3);
+    background: linear-gradient(135deg, var(--bg2) 0%, rgba(110,231,183,0.04) 100%);
+  }
+  .metric-card.highlight-gold {
+    border-color: rgba(251,191,36,0.3);
+    background: linear-gradient(135deg, var(--bg2) 0%, rgba(251,191,36,0.04) 100%);
+  }
+
+  .metric-label {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text3); margin-bottom: 10px;
+  }
+
+  .metric-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px; line-height: 1;
+    color: var(--text);
+  }
+  .metric-value.accent { color: var(--accent); }
+  .metric-value.gold { color: var(--gold); }
+  .metric-value.blue { color: var(--blue); }
+  .metric-value.purple { color: var(--purple); }
+
+  .metric-sub {
+    font-size: 12px; color: var(--text3); margin-top: 6px;
+  }
+
+  .chart-panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+  }
+
+  .chart-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+  }
+
+  .chart-title {
+    font-size: 14px; font-weight: 500; color: var(--text2);
+  }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 16px;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--text3);
+  }
+  .legend-dot {
+    width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0;
+  }
+
+  .chart-wrap {
+    position: relative; height: 320px;
+  }
+
+  .if-banner {
+    background: linear-gradient(135deg, var(--accent-dim) 0%, var(--gold-dim) 100%);
+    border: 1px solid rgba(110,231,183,0.2);
+    border-radius: 16px;
+    padding: 20px 24px;
+    display: flex; align-items: center; gap: 16px;
+  }
+
+  .if-icon {
+    font-size: 32px; flex-shrink: 0;
+  }
+
+  .if-text strong {
+    display: block; font-size: 16px; font-weight: 600; color: var(--accent); margin-bottom: 4px;
+  }
+  .if-text span {
+    font-size: 14px; color: var(--text2);
+  }
+
+  .breakdown-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  }
+  @media (max-width: 700px) {
+    .breakdown-grid { grid-template-columns: 1fr; }
+  }
+
+  .bk-item {
+    background: var(--bg3); border-radius: 12px; padding: 16px;
+    border-left: 3px solid transparent;
+  }
+  .bk-item.inv { border-left-color: var(--blue); }
+  .bk-item.ret { border-left-color: var(--gold); }
+  .bk-item.gai { border-left-color: var(--accent); }
+
+  .bk-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+  .bk-val { font-family: 'DM Mono', monospace; font-size: 17px; font-weight: 500; }
+  .bk-val.blue { color: var(--blue); }
+  .bk-val.gold { color: var(--gold); }
+  .bk-val.green { color: var(--accent); }
+
+  footer {
+    text-align: center; font-size: 12px; color: var(--text3);
+    padding-top: 40px; border-top: 1px solid var(--border);
+    margin-top: 48px;
+  }
+
+  .tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--accent-dim2); color: var(--accent2);
+    border: 1px solid rgba(110,231,183,0.15);
+    border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 500;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp 0.5s ease both; }
+  .fade-up-2 { animation: fadeUp 0.5s 0.1s ease both; }
+  .fade-up-3 { animation: fadeUp 0.5s 0.2s ease both; }
+  .fade-up-4 { animation: fadeUp 0.5s 0.3s ease both; }
+</style>
+</head>
+<body>
+
+<div class="noise"></div>
+<div class="glow-orb g1"></div>
+<div class="glow-orb g2"></div>
+
+<div class="container">
+  <header class="fade-up">
+    <div class="header-label">Planificación financiera</div>
+    <h1>Tu camino hacia la<br><em>independencia</em></h1>
+    <p class="header-sub">Calcula cuándo podrás dejar de trabajar y vivir de tus rentas invirtiendo en un índice S&P 500.</p>
+  </header>
+
+  <div class="grid-main">
+    <!-- LEFT: Inputs -->
+    <div class="fade-up-2">
+      <div class="panel">
+        <div class="panel-title">Parámetros personales</div>
+
+        <div class="field">
+          <label>Edad actual</label>
+          <div class="field-suffix">
+            <div class="input-wrap" style="flex:1">
+              <span class="input-prefix" style="left:14px">👤</span>
+              <input type="number" id="edad" value="34" min="18" max="60">
+            </div>
+            <span class="field-unit">años</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Capital inicial invertido</label>
+          <div class="input-wrap">
+            <span class="input-prefix">€</span>
+            <input type="number" id="capital" value="50000" min="0" step="1000">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Aportación mensual</label>
+          <div class="field-suffix">
+            <div class="input-wrap" style="flex:1">
+              <span class="input-prefix">€</span>
+              <input type="number" id="aportacion" value="720" min="0" step="50">
+            </div>
+            <span class="field-unit">/mes</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Renta mensual deseada</label>
+          <div class="field-suffix">
+            <div class="input-wrap" style="flex:1">
+              <span class="input-prefix">€</span>
+              <input type="number" id="renta" value="2000" min="100" step="100">
+            </div>
+            <span class="field-unit">/mes</span>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="panel-title">Parámetros del fondo (fijos)</div>
+        <div class="fixed-params">
+          <div class="param-chip">
+            <div class="chip-label">Rentabilidad bruta</div>
+            <div class="chip-value">10.00%</div>
+          </div>
+          <div class="param-chip">
+            <div class="chip-label">Inflación esperada</div>
+            <div class="chip-value">2.00%</div>
+          </div>
+          <div class="param-chip">
+            <div class="chip-label">TER (comisiones)</div>
+            <div class="chip-value">0.06%</div>
+          </div>
+          <div class="param-chip">
+            <div class="chip-label">Ret. neta real</div>
+            <div class="chip-value" id="ret-neta-chip">7.94%</div>
+          </div>
+          <div class="param-chip" style="grid-column:1/-1">
+            <div class="chip-label">Regla de retirada segura</div>
+            <div class="chip-value">3.50% anual</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Results -->
+    <div class="right-col fade-up-3">
+
+      <!-- IF Banner -->
+      <div class="if-banner" id="if-banner">
+        <div class="if-icon">🎯</div>
+        <div class="if-text">
+          <strong id="if-headline">Calculando...</strong>
+          <span id="if-subline">—</span>
+        </div>
+      </div>
+
+      <!-- Metrics -->
+      <div class="metrics-grid">
+        <div class="metric-card highlight">
+          <div class="metric-label">Edad IF</div>
+          <div class="metric-value accent" id="m-edad">—</div>
+          <div class="metric-sub" id="m-años">— años desde hoy</div>
+        </div>
+        <div class="metric-card highlight-gold">
+          <div class="metric-label">Capital necesario</div>
+          <div class="metric-value gold" id="m-capital-if">—</div>
+          <div class="metric-sub">para renta 3.5%</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Renta mensual IF</div>
+          <div class="metric-value blue" id="m-renta-if">—</div>
+          <div class="metric-sub">en euros de hoy</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Total aportado</div>
+          <div class="metric-value purple" id="m-total-aportado">—</div>
+          <div class="metric-sub" id="m-multiplicador">multiplicador —x</div>
+        </div>
+      </div>
+
+      <!-- Chart -->
+      <div class="chart-panel">
+        <div class="chart-header">
+          <div class="chart-title">Evolución del patrimonio hasta los 65 años</div>
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-dot" style="background:#6ee7b7"></div>
+              <span>Fase de acumulación</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background:#fbbf24"></div>
+              <span>Fase IF (retiro)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background:#60a5fa; opacity:0.5"></div>
+              <span>Capital invertido</span>
+            </div>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="myChart" role="img" aria-label="Gráfica de crecimiento del patrimonio desde la edad actual hasta los 65 años, mostrando la fase de acumulación y la fase IF">
+            Gráfica de evolución del patrimonio hacia la independencia financiera.
+          </canvas>
+        </div>
+      </div>
+
+      <!-- Breakdown at IF -->
+      <div class="panel">
+        <div class="panel-title">Desglose en la edad IF</div>
+        <div class="breakdown-grid">
+          <div class="bk-item inv">
+            <div class="bk-label">Capital aportado</div>
+            <div class="bk-val blue" id="bk-aportado">—</div>
+          </div>
+          <div class="bk-item ret">
+            <div class="bk-label">Retiros acumulados</div>
+            <div class="bk-val gold" id="bk-retiros">—</div>
+          </div>
+          <div class="bk-item gai">
+            <div class="bk-label">Ganancia por interés</div>
+            <div class="bk-val green" id="bk-ganancia">—</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="fade-up-4">
+    <span class="tag">📊 Simulación orientativa</span>
+    <p style="margin-top:12px">Rentabilidades pasadas no garantizan resultados futuros · Datos en términos reales (ajustados por inflación) · TER incluido en cálculo</p>
+  </footer>
+</div>
+
+<script>
+  const GROSS_RETURN = 0.10;
+  const INFLATION = 0.02;
+  const TER = 0.0006;
+  const NET_REAL = GROSS_RETURN - INFLATION - TER;
+  const WITHDRAWAL_RATE = 0.035;
+  const MAX_AGE = 65;
+
+  document.getElementById('ret-neta-chip').textContent = (NET_REAL * 100).toFixed(2) + '%';
+
+  const fmt = (v) => '€' + Math.round(v).toLocaleString('es-ES');
+
+  let chart;
+
+  function calcular() {
+    const edad = parseInt(document.getElementById('edad').value) || 34;
+    const capital0 = parseFloat(document.getElementById('capital').value) || 50000;
+    const aportacionMes = parseFloat(document.getElementById('aportacion').value) || 720;
+    const rentaMes = parseFloat(document.getElementById('renta').value) || 2000;
+
+    const rentaAnual = rentaMes * 12;
+    const capitalNecesario = rentaAnual / WITHDRAWAL_RATE;
+    const aportacionAnual = aportacionMes * 12;
+    const rMes = NET_REAL / 12;
+
+    let edadIF = null;
+    let capital = capital0;
+    let totalAportado = capital0;
+
+    const labels = [];
+    const dataCrecimiento = [];
+    const dataAportado = [];
+    const phaseColors = [];
+
+    let ifFound = false;
+    let capitalEnIF = 0;
+    let totalAportadoEnIF = 0;
+    let retiros65 = 0;
+    let capitalAt65 = 0;
+
+    for (let a = edad; a <= MAX_AGE; a++) {
+      labels.push('Edad ' + a);
+
+      if (!ifFound) {
+        if (a > edad) {
+          for (let m = 0; m < 12; m++) {
+            capital = capital * (1 + rMes) + aportacionMes;
+          }
+          totalAportado += aportacionAnual;
+        }
+        dataCrecimiento.push(Math.round(capital));
+        dataAportado.push(Math.round(totalAportado));
+
+        if (capital >= capitalNecesario && !ifFound) {
+          ifFound = true;
+          edadIF = a;
+          capitalEnIF = capital;
+          totalAportadoEnIF = totalAportado;
+          phaseColors.push('#6ee7b7');
+        } else {
+          phaseColors.push('#6ee7b7');
+        }
+      } else {
+        const retiroMes = rentaMes;
+        for (let m = 0; m < 12; m++) {
+          capital = capital * (1 + rMes) - retiroMes;
+          if (capital < 0) capital = 0;
+        }
+        retiros65 += rentaAnual;
+        dataCrecimiento.push(Math.round(capital));
+        dataAportado.push(Math.round(totalAportadoEnIF));
+        phaseColors.push('#fbbf24');
+      }
+    }
+
+    capitalAt65 = dataCrecimiento[dataCrecimiento.length - 1];
+
+    const totalRetiros = edadIF ? retiros65 : 0;
+    const ganancia = capitalEnIF - totalAportadoEnIF;
+    const multiplicador = totalAportadoEnIF > 0 ? (capitalEnIF / totalAportadoEnIF).toFixed(1) : '—';
+    const añosParaIF = edadIF ? edadIF - edad : null;
+
+    document.getElementById('m-edad').textContent = edadIF ? edadIF + ' años' : '>65';
+    document.getElementById('m-años').textContent = añosParaIF !== null ? añosParaIF + ' años desde hoy' : 'fuera de rango';
+    document.getElementById('m-capital-if').textContent = fmt(capitalNecesario);
+    document.getElementById('m-renta-if').textContent = fmt(rentaMes) + '/mes';
+    document.getElementById('m-total-aportado').textContent = fmt(totalAportadoEnIF);
+    document.getElementById('m-multiplicador').textContent = 'multiplicador ' + multiplicador + 'x';
+
+    document.getElementById('bk-aportado').textContent = fmt(totalAportadoEnIF);
+    document.getElementById('bk-retiros').textContent = fmt(totalRetiros);
+    document.getElementById('bk-ganancia').textContent = fmt(Math.max(0, ganancia));
+
+    if (edadIF) {
+      document.getElementById('if-headline').textContent = '🎉 Independencia financiera a los ' + edadIF + ' años';
+      document.getElementById('if-subline').textContent =
+        'Necesitas ' + fmt(capitalNecesario) + ' para retirar ' + fmt(rentaMes) + '/mes indefinidamente (regla 3.5%)';
+    } else {
+      document.getElementById('if-headline').textContent = '⚠️ No alcanzas la IF antes de los 65';
+      document.getElementById('if-subline').textContent = 'Considera aumentar aportaciones o reducir la renta deseada';
+    }
+
+    drawChart(labels, dataCrecimiento, dataAportado, phaseColors, capitalNecesario, edadIF);
+  }
+
+  function drawChart(labels, dataCrecimiento, dataAportado, phaseColors, capitalNecesario, edadIF) {
+    if (chart) chart.destroy();
+
+    const ctx = document.getElementById('myChart').getContext('2d');
+
+    const ifLinePlugin = {
+      id: 'ifLine',
+      afterDraw(chart) {
+        if (!edadIF) return;
+        const xScale = chart.scales.x;
+        const yScale = chart.scales.y;
+        const ctx = chart.ctx;
+
+        const idx = labels.indexOf('Edad ' + edadIF);
+        if (idx === -1) return;
+        const x = xScale.getPixelForValue(idx);
+        const top = yScale.top;
+        const bottom = yScale.bottom;
+
+        ctx.save();
+        ctx.setLineDash([6, 4]);
+        ctx.strokeStyle = 'rgba(110,231,183,0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(x, top);
+        ctx.lineTo(x, bottom);
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.save();
+        ctx.fillStyle = 'rgba(110,231,183,0.9)';
+        ctx.font = '11px Outfit, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('IF ' + edadIF + 'a', x, top - 6);
+        ctx.restore();
+      }
+    };
+
+    chart = new Chart(ctx, {
+      type: 'bar',
+      plugins: [ifLinePlugin],
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Patrimonio',
+            data: dataCrecimiento,
+            backgroundColor: phaseColors.map(c => c + 'cc'),
+            borderColor: phaseColors,
+            borderWidth: 0,
+            borderRadius: 4,
+            order: 1,
+          },
+          {
+            label: 'Capital aportado',
+            data: dataAportado,
+            type: 'line',
+            borderColor: 'rgba(96,165,250,0.6)',
+            backgroundColor: 'rgba(96,165,250,0.06)',
+            borderWidth: 1.5,
+            pointRadius: 0,
+            fill: true,
+            tension: 0.4,
+            order: 0,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1a1e2a',
+            borderColor: 'rgba(255,255,255,0.1)',
+            borderWidth: 1,
+            titleColor: '#f0f1f5',
+            bodyColor: '#8a8fa8',
+            padding: 12,
+            callbacks: {
+              label: function(ctx) {
+                return ' ' + ctx.dataset.label + ': ' + '€' + Math.round(ctx.parsed.y).toLocaleString('es-ES');
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+            ticks: {
+              color: '#5a5f78', font: { family: 'Outfit', size: 11 },
+              maxRotation: 45,
+              callback: function(val, i) {
+                return i % 2 === 0 ? this.getLabelForValue(val).replace('Edad ', '') : '';
+              }
+            }
+          },
+          y: {
+            grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+            ticks: {
+              color: '#5a5f78', font: { family: 'DM Mono', size: 11 },
+              callback: v => {
+                if (v >= 1000000) return '€' + (v / 1000000).toFixed(1) + 'M';
+                if (v >= 1000) return '€' + (v / 1000).toFixed(0) + 'k';
+                return '€' + v;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  ['edad', 'capital', 'aportacion', 'renta'].forEach(id => {
+    document.getElementById(id).addEventListener('input', calcular);
+  });
+
+  calcular();
+</script>
+</body>
+</html>
