@@ -268,19 +268,49 @@
     border: 1px solid rgba(110,231,183,0.2);
     border-radius: 16px;
     padding: 20px 24px;
-    display: flex; align-items: center; gap: 16px;
+    display: flex; flex-direction: column; gap: 10px;
   }
 
-  .if-icon {
-    font-size: 32px; flex-shrink: 0;
+  .scenarios-banner {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
   }
 
-  .if-text strong {
-    display: block; font-size: 16px; font-weight: 600; color: var(--accent); margin-bottom: 4px;
+  .sc-col {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 10px; text-align: center;
+    cursor: pointer; transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
   }
-  .if-text span {
-    font-size: 14px; color: var(--text2);
+  .sc-col:hover { border-color: var(--border2); }
+  .sc-col.sc-selected-0 {
+    border-color: rgba(248,113,113,0.5);
+    background: linear-gradient(135deg, var(--bg3) 0%, rgba(248,113,113,0.08) 100%);
+    box-shadow: 0 0 0 1px rgba(248,113,113,0.15);
   }
+  .sc-col.sc-selected-1 {
+    border-color: rgba(251,191,36,0.4);
+    background: linear-gradient(135deg, var(--bg3) 0%, rgba(251,191,36,0.08) 100%);
+    box-shadow: 0 0 0 1px rgba(251,191,36,0.15);
+  }
+  .sc-col.sc-selected-2 {
+    border-color: rgba(110,231,183,0.4);
+    background: linear-gradient(135deg, var(--bg3) 0%, rgba(110,231,183,0.08) 100%);
+    box-shadow: 0 0 0 1px rgba(110,231,183,0.15);
+  }
+  .sc-col-emoji { font-size: 18px; margin-bottom: 5px; }
+  .sc-col-label {
+    font-size: 10px; color: var(--text3); text-transform: uppercase;
+    letter-spacing: 0.1em; font-weight: 600; margin-bottom: 7px;
+  }
+  .sc-col-age {
+    font-family: 'DM Serif Display', serif; font-size: 24px; line-height: 1;
+  }
+  .sc-col-age.red { color: var(--red); }
+  .sc-col-age.gold { color: var(--gold); }
+  .sc-col-age.green { color: var(--accent); }
+  .sc-col-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+  .sc-col-coast { font-size: 10px; color: var(--text3); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+  .sc-col-coast span { color: var(--accent2); font-weight: 600; }
+  .if-note { font-size: 12px; color: var(--text2); }
 
   .breakdown-grid {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
@@ -360,7 +390,7 @@
           <label>Capital inicial invertido</label>
           <div class="input-wrap">
             <span class="input-prefix">€</span>
-            <input type="number" id="capital" value="50000" min="0" step="1000">
+            <input type="number" id="capital" value="43802" min="0" step="1000">
           </div>
         </div>
 
@@ -380,9 +410,20 @@
           <div class="field-suffix">
             <div class="input-wrap" style="flex:1">
               <span class="input-prefix">€</span>
-              <input type="number" id="renta" value="2000" min="100" step="100">
+              <input type="number" id="renta" value="2076" min="100" step="100">
             </div>
             <span class="field-unit">/mes</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Colchón de liquidez</label>
+          <div class="field-suffix">
+            <div class="input-wrap" style="flex:1">
+              <span class="input-prefix" style="left:14px">🛡</span>
+              <input type="number" id="colchon" value="1" min="0" max="36" step="1">
+            </div>
+            <span class="field-unit">meses en cash</span>
           </div>
         </div>
 
@@ -392,7 +433,7 @@
         <div class="fixed-params">
           <div class="param-chip">
             <div class="chip-label">Rentabilidad bruta</div>
-            <div class="chip-value">10.00%</div>
+            <div class="chip-value" id="ret-bruta-chip">10.00%</div>
           </div>
           <div class="param-chip">
             <div class="chip-label">Inflación esperada</div>
@@ -406,6 +447,10 @@
             <div class="chip-label">Ret. neta real</div>
             <div class="chip-value" id="ret-neta-chip">7.94%</div>
           </div>
+          <div class="param-chip">
+            <div class="chip-label">Fracción ganancia IF</div>
+            <div class="chip-value" id="gain-frac-chip">—</div>
+          </div>
           <div class="param-chip" style="grid-column:1/-1">
             <div class="chip-label">Regla de retirada segura</div>
             <div class="chip-value">3.50% anual</div>
@@ -417,13 +462,32 @@
     <!-- RIGHT: Results -->
     <div class="right-col fade-up-3">
 
-      <!-- IF Banner -->
-      <div class="if-banner" id="if-banner">
-        <div class="if-icon">🎯</div>
-        <div class="if-text">
-          <strong id="if-headline">Calculando...</strong>
-          <span id="if-subline">—</span>
+      <!-- IF Banner: tres escenarios -->
+      <div class="if-banner">
+        <div class="scenarios-banner">
+          <div class="sc-col">
+            <div class="sc-col-emoji">🐻</div>
+            <div class="sc-col-label">Pesimista · 6%</div>
+            <div class="sc-col-age red" id="sc-edad-pes">—</div>
+            <div class="sc-col-sub" id="sc-sub-pes">—</div>
+            <div class="sc-col-coast" id="sc-coast-pes">—</div>
+          </div>
+          <div class="sc-col">
+            <div class="sc-col-emoji">📊</div>
+            <div class="sc-col-label">Base · 8%</div>
+            <div class="sc-col-age gold" id="sc-edad-base">—</div>
+            <div class="sc-col-sub" id="sc-sub-base">—</div>
+            <div class="sc-col-coast" id="sc-coast-base">—</div>
+          </div>
+          <div class="sc-col">
+            <div class="sc-col-emoji">🚀</div>
+            <div class="sc-col-label">Optimista · 10%</div>
+            <div class="sc-col-age green" id="sc-edad-opt">—</div>
+            <div class="sc-col-sub" id="sc-sub-opt">—</div>
+            <div class="sc-col-coast" id="sc-coast-opt">—</div>
+          </div>
         </div>
+        <div class="if-note" id="if-subline">—</div>
       </div>
 
       <!-- Metrics -->
@@ -453,24 +517,28 @@
       <!-- Chart -->
       <div class="chart-panel">
         <div class="chart-header">
-          <div class="chart-title">Evolución del patrimonio hasta los 65 años</div>
+          <div class="chart-title">Evolución del patrimonio hasta los 90 años</div>
           <div class="legend">
             <div class="legend-item">
-              <div class="legend-dot" style="background:#6ee7b7"></div>
-              <span>Fase de acumulación</span>
+              <div class="legend-dot" style="background:#f87171"></div>
+              <span>Pesimista (6%)</span>
             </div>
             <div class="legend-item">
               <div class="legend-dot" style="background:#fbbf24"></div>
-              <span>Fase IF (retiro)</span>
+              <span>Base (8%)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background:#6ee7b7"></div>
+              <span>Optimista (10%)</span>
             </div>
             <div class="legend-item">
               <div class="legend-dot" style="background:#60a5fa; opacity:0.5"></div>
-              <span>Capital invertido</span>
+              <span>Capital aportado</span>
             </div>
           </div>
         </div>
         <div class="chart-wrap">
-          <canvas id="myChart" role="img" aria-label="Gráfica de crecimiento del patrimonio desde la edad actual hasta los 65 años, mostrando la fase de acumulación y la fase IF">
+          <canvas id="myChart" role="img" aria-label="Gráfica de crecimiento del patrimonio desde la edad actual hasta los 90 años, mostrando la fase de acumulación y la fase IF">
             Gráfica de evolución del patrimonio hacia la independencia financiera.
           </canvas>
         </div>
@@ -478,19 +546,27 @@
 
       <!-- Breakdown at IF -->
       <div class="panel">
-        <div class="panel-title">Desglose en la edad IF</div>
-        <div class="breakdown-grid">
+        <div class="panel-title" id="bk-title">Desglose en la edad IF · escenario base 8%</div>
+        <div class="breakdown-grid" style="grid-template-columns:repeat(2,1fr)">
           <div class="bk-item inv">
             <div class="bk-label">Capital aportado</div>
             <div class="bk-val blue" id="bk-aportado">—</div>
           </div>
+          <div class="bk-item" style="border-left-color:var(--purple)">
+            <div class="bk-label">Colchón liquidez</div>
+            <div class="bk-val" style="color:var(--purple)" id="bk-colchon">—</div>
+          </div>
           <div class="bk-item ret">
-            <div class="bk-label">Retiros acumulados</div>
+            <div class="bk-label">Retiros hasta 90</div>
             <div class="bk-val gold" id="bk-retiros">—</div>
           </div>
           <div class="bk-item gai">
             <div class="bk-label">Ganancia por interés</div>
             <div class="bk-val green" id="bk-ganancia">—</div>
+          </div>
+          <div class="bk-item" style="border-left-color:var(--accent); grid-column:1/-1">
+            <div class="bk-label">Patrimonio a los 90</div>
+            <div class="bk-val" style="color:var(--accent)" id="bk-terminal">—</div>
           </div>
         </div>
       </div>
@@ -510,221 +586,262 @@
   const TER = 0.0006;
   const NET_REAL = GROSS_RETURN - INFLATION - TER;
   const WITHDRAWAL_RATE = 0.035;
-  const MAX_AGE = 65;
+  const IRPF_GAIN_RATE = 0.20;
+  const MAX_AGE = 90;
 
-  document.getElementById('ret-neta-chip').textContent = (NET_REAL * 100).toFixed(2) + '%';
+  const SCENARIOS = [
+    { gross: 0.06, label: '6%', color: '#f87171' },
+    { gross: 0.08, label: '8%', color: '#fbbf24' },
+    { gross: 0.10, label: '10%', color: '#6ee7b7' },
+  ];
 
   const fmt = (v) => '€' + Math.round(v).toLocaleString('es-ES');
 
   let chart;
+  let lastScenarioResults = null;
+  let lastCalcParams = null;
+  let selectedSc = 1;
+
+  function updateMetrics(scenarioResults, selIdx, colchonAmount, rentaMes, edad) {
+    const res = scenarioResults[selIdx];
+    const netReal = res.gross - INFLATION - TER;
+    document.getElementById('ret-bruta-chip').textContent = (res.gross * 100).toFixed(2) + '%';
+    document.getElementById('ret-neta-chip').textContent = (netReal * 100).toFixed(2) + '%';
+
+    const gainFracIF = res.edadIF
+      ? ((res.capitalEnIF - res.costBasisEnIF) / res.capitalEnIF * 100).toFixed(1) + '%'
+      : '—';
+    document.getElementById('gain-frac-chip').textContent = gainFracIF;
+
+    document.getElementById('if-subline').textContent = res.edadIF
+      ? fmt(res.capNecPortfolio) + ' invertido + ' + fmt(colchonAmount) + ' colchón = ' + fmt(res.capNec) + ' total'
+      : 'No alcanzas la IF antes de los 90 con este escenario';
+
+    const años = res.edadIF ? res.edadIF - edad : null;
+    document.getElementById('m-edad').textContent = res.edadIF ? res.edadIF + ' años' : '>90';
+    document.getElementById('m-años').textContent = años !== null
+      ? años + ' años · escenario ' + res.label : 'fuera de rango';
+    document.getElementById('m-capital-if').textContent = res.edadIF ? fmt(res.capNec) : '—';
+    document.getElementById('m-renta-if').textContent = fmt(rentaMes) + '/mes';
+    document.getElementById('m-total-aportado').textContent = res.edadIF ? fmt(res.totalAportadoEnIF) : '—';
+    const mult = res.totalInvertido > 0 ? (res.capitalEnIF / res.totalInvertido).toFixed(1) : '—';
+    document.getElementById('m-multiplicador').textContent = 'multiplicador ' + mult + 'x';
+
+    document.getElementById('bk-title').textContent = 'Desglose · escenario ' + res.label;
+    document.getElementById('bk-aportado').textContent = res.edadIF ? fmt(res.totalAportadoEnIF) : '—';
+    document.getElementById('bk-colchon').textContent = fmt(colchonAmount);
+    document.getElementById('bk-retiros').textContent = res.edadIF ? fmt(res.retiros65) : '—';
+    document.getElementById('bk-ganancia').textContent = res.edadIF ? fmt(Math.max(0, res.ganancia)) : '—';
+    document.getElementById('bk-terminal').textContent = fmt(res.terminalValue);
+
+    document.querySelectorAll('.sc-col').forEach((el, i) => {
+      el.classList.remove('sc-selected-0', 'sc-selected-1', 'sc-selected-2');
+      if (i === selIdx) el.classList.add('sc-selected-' + selIdx);
+    });
+  }
 
   function calcular() {
     const edad = parseInt(document.getElementById('edad').value) || 34;
-    const capital0 = parseFloat(document.getElementById('capital').value) || 50000;
-    const aportacionMes = parseFloat(document.getElementById('aportacion').value) || 720;
-    const rentaMes = parseFloat(document.getElementById('renta').value) || 2000;
+    const capital0 = parseFloat(document.getElementById('capital').value) || 43802;
+    const _ap = document.getElementById('aportacion').value;
+    const aportacionMes = _ap === '' ? 720 : (parseFloat(_ap) || 0);
+    const rentaMes = parseFloat(document.getElementById('renta').value) || 2076;
+    const _col = document.getElementById('colchon').value;
+    const colchonMeses = _col === '' ? 12 : (parseInt(_col) || 0);
 
     const rentaAnual = rentaMes * 12;
-    const capitalNecesario = rentaAnual / WITHDRAWAL_RATE;
-    const aportacionAnual = aportacionMes * 12;
-    const rMes = NET_REAL / 12;
-
-    let edadIF = null;
-    let capital = capital0;
-    let totalAportado = capital0;
+    const colchonAmount = colchonMeses * rentaMes;
 
     const labels = [];
-    const dataCrecimiento = [];
-    const dataAportado = [];
-    const phaseColors = [];
+    for (let a = edad; a <= MAX_AGE; a++) labels.push('Edad ' + a);
 
-    let ifFound = false;
-    let capitalEnIF = 0;
-    let totalAportadoEnIF = 0;
-    let retiros65 = 0;
-    let capitalAt65 = 0;
+    let dataAportado = null;
+    const scenarioResults = [];
 
-    for (let a = edad; a <= MAX_AGE; a++) {
-      labels.push('Edad ' + a);
+    SCENARIOS.forEach((sc, idx) => {
+      const rMes = (sc.gross - INFLATION - TER) / 12;
 
-      if (!ifFound) {
-        if (a > edad) {
-          for (let m = 0; m < 12; m++) {
-            capital = capital * (1 + rMes) + aportacionMes;
+      function simIF(capNec) {
+        let cap = capital0, costB = capital0;
+        for (let a = edad; a <= MAX_AGE; a++) {
+          if (a > edad) {
+            for (let m = 0; m < 12; m++) cap = cap * (1 + rMes) + aportacionMes;
+            costB += aportacionMes * 12;
           }
-          totalAportado += aportacionAnual;
+          if (cap >= capNec) return { cap, costB };
         }
-        dataCrecimiento.push(Math.round(capital));
-        dataAportado.push(Math.round(totalAportado));
-
-        if (capital >= capitalNecesario && !ifFound) {
-          ifFound = true;
-          edadIF = a;
-          capitalEnIF = capital;
-          totalAportadoEnIF = totalAportado;
-          phaseColors.push('#6ee7b7');
-        } else {
-          phaseColors.push('#6ee7b7');
-        }
-      } else {
-        const retiroMes = rentaMes;
-        for (let m = 0; m < 12; m++) {
-          capital = capital * (1 + rMes) - retiroMes;
-          if (capital < 0) capital = 0;
-        }
-        retiros65 += rentaAnual;
-        dataCrecimiento.push(Math.round(capital));
-        dataAportado.push(Math.round(totalAportadoEnIF));
-        phaseColors.push('#fbbf24');
+        return null;
       }
-    }
 
-    capitalAt65 = dataCrecimiento[dataCrecimiento.length - 1];
+      let gf = 0.68;
+      let capNec = (rentaAnual / (1 - IRPF_GAIN_RATE * gf)) / WITHDRAWAL_RATE + colchonAmount;
+      const r1 = simIF(capNec);
+      if (r1) {
+        gf = Math.max(0, (r1.cap - r1.costB) / r1.cap);
+        capNec = (rentaAnual / (1 - IRPF_GAIN_RATE * gf)) / WITHDRAWAL_RATE + colchonAmount;
+      }
 
-    const totalRetiros = edadIF ? retiros65 : 0;
-    const ganancia = capitalEnIF - totalAportadoEnIF;
-    const multiplicador = totalAportadoEnIF > 0 ? (capitalEnIF / totalAportadoEnIF).toFixed(1) : '—';
-    const añosParaIF = edadIF ? edadIF - edad : null;
+      const rAnual = Math.pow(1 + rMes, 12) - 1;
+      const chartData = [], chartAportado = [];
+      let capital = capital0, totalAportado = 0, costBasis = capital0;
+      let ifFound = false, edadIF = null, capitalEnIF = 0, totalAportadoEnIF = 0, costBasisEnIF = capital0;
+      let retiros65 = 0, coastEdad = null;
 
-    document.getElementById('m-edad').textContent = edadIF ? edadIF + ' años' : '>65';
-    document.getElementById('m-años').textContent = añosParaIF !== null ? añosParaIF + ' años desde hoy' : 'fuera de rango';
-    document.getElementById('m-capital-if').textContent = fmt(capitalNecesario);
-    document.getElementById('m-renta-if').textContent = fmt(rentaMes) + '/mes';
-    document.getElementById('m-total-aportado').textContent = fmt(totalAportadoEnIF);
-    document.getElementById('m-multiplicador').textContent = 'multiplicador ' + multiplicador + 'x';
+      for (let a = edad; a <= MAX_AGE; a++) {
+        if (!ifFound) {
+          if (a > edad) {
+            for (let m = 0; m < 12; m++) capital = capital * (1 + rMes) + aportacionMes;
+            totalAportado += aportacionMes * 12;
+            costBasis += aportacionMes * 12;
+          }
+          if (!coastEdad && capital * Math.pow(1 + rAnual, MAX_AGE - a) >= capNec) {
+            coastEdad = a;
+          }
+          chartData.push(Math.round(capital));
+          chartAportado.push(Math.round(totalAportado));
+          if (capital >= capNec) {
+            ifFound = true; edadIF = a;
+            capitalEnIF = capital; totalAportadoEnIF = totalAportado; costBasisEnIF = costBasis;
+          }
+        } else {
+          const capAntes = capital;
+          const gfNow = capital > 0 ? Math.max(0, (capital - costBasis) / capital) : 0;
+          const grossMes = rentaMes / Math.max(0.01, 1 - IRPF_GAIN_RATE * gfNow);
+          for (let m = 0; m < 12; m++) {
+            capital = capital * (1 + rMes) - grossMes;
+            if (capital < 0) capital = 0;
+          }
+          const frac = capAntes > 0 ? Math.min(1, grossMes * 12 / capAntes) : 0;
+          costBasis = Math.max(0, costBasis * (1 - frac));
+          retiros65 += rentaAnual;
+          chartData.push(Math.round(capital));
+          chartAportado.push(Math.round(totalAportadoEnIF));
+        }
+      }
 
-    document.getElementById('bk-aportado').textContent = fmt(totalAportadoEnIF);
-    document.getElementById('bk-retiros').textContent = fmt(totalRetiros);
-    document.getElementById('bk-ganancia').textContent = fmt(Math.max(0, ganancia));
+      if (idx === 1) dataAportado = chartAportado;
 
-    if (edadIF) {
-      document.getElementById('if-headline').textContent = '🎉 Independencia financiera a los ' + edadIF + ' años';
-      document.getElementById('if-subline').textContent =
-        'Necesitas ' + fmt(capitalNecesario) + ' para retirar ' + fmt(rentaMes) + '/mes indefinidamente (regla 3.5%)';
-    } else {
-      document.getElementById('if-headline').textContent = '⚠️ No alcanzas la IF antes de los 65';
-      document.getElementById('if-subline').textContent = 'Considera aumentar aportaciones o reducir la renta deseada';
-    }
+      scenarioResults.push({
+        ...sc, edadIF, coastEdad, capitalEnIF, totalAportadoEnIF, costBasisEnIF,
+        capNec, capNecPortfolio: capNec - colchonAmount,
+        chartData, retiros65,
+        terminalValue: chartData[chartData.length - 1],
+        ganancia: edadIF ? capitalEnIF - capital0 - totalAportadoEnIF : 0,
+        totalInvertido: capital0 + totalAportadoEnIF,
+      });
+    });
 
-    drawChart(labels, dataCrecimiento, dataAportado, phaseColors, capitalNecesario, edadIF);
+    const scIds = [
+      ['sc-edad-pes', 'sc-sub-pes', 'sc-coast-pes'],
+      ['sc-edad-base', 'sc-sub-base', 'sc-coast-base'],
+      ['sc-edad-opt', 'sc-sub-opt', 'sc-coast-opt'],
+    ];
+    scenarioResults.forEach((res, i) => {
+      const [eid, sid, cid] = scIds[i];
+      document.getElementById(eid).textContent = res.edadIF ? res.edadIF + ' años' : '>90';
+      document.getElementById(sid).textContent = res.edadIF
+        ? (res.edadIF - edad) + 'a desde hoy' : 'fuera de rango';
+      const coastEl = document.getElementById(cid);
+      if (res.coastEdad) {
+        const coastAños = res.coastEdad - edad;
+        coastEl.innerHTML = 'Puedes dejar de aportar a los <span>' + res.coastEdad + '</span> años'
+          + (coastAños <= 0 ? ' · ¡ya ahora!' : ' · en ' + coastAños + 'a');
+      } else {
+        coastEl.innerHTML = 'Necesitas aportar hasta los 90';
+      }
+    });
+
+    lastScenarioResults = scenarioResults;
+    lastCalcParams = { colchonAmount, rentaMes, edad };
+    updateMetrics(scenarioResults, selectedSc, colchonAmount, rentaMes, edad);
+
+    drawChart(labels, scenarioResults, dataAportado, scenarioResults[selectedSc].capNec);
   }
 
-  function drawChart(labels, dataCrecimiento, dataAportado, phaseColors, capitalNecesario, edadIF) {
+  function drawChart(labels, scenarios, dataAportado, capitalNecesario) {
     if (chart) chart.destroy();
-
     const ctx = document.getElementById('myChart').getContext('2d');
 
     const ifLinePlugin = {
       id: 'ifLine',
-      afterDraw(chart) {
-        if (!edadIF) return;
-        const xScale = chart.scales.x;
-        const yScale = chart.scales.y;
-        const ctx = chart.ctx;
-
-        const idx = labels.indexOf('Edad ' + edadIF);
-        if (idx === -1) return;
-        const x = xScale.getPixelForValue(idx);
-        const top = yScale.top;
-        const bottom = yScale.bottom;
-
-        ctx.save();
-        ctx.setLineDash([6, 4]);
-        ctx.strokeStyle = 'rgba(110,231,183,0.4)';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(x, top);
-        ctx.lineTo(x, bottom);
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.save();
-        ctx.fillStyle = 'rgba(110,231,183,0.9)';
-        ctx.font = '11px Outfit, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('IF ' + edadIF + 'a', x, top - 6);
-        ctx.restore();
+      afterDraw(c) {
+        const xScale = c.scales.x, yScale = c.scales.y, cx = c.ctx;
+        const yT = yScale.getPixelForValue(capitalNecesario);
+        if (yT >= yScale.top && yT <= yScale.bottom) {
+          cx.save();
+          cx.setLineDash([4, 4]);
+          cx.strokeStyle = 'rgba(255,255,255,0.12)';
+          cx.lineWidth = 1;
+          cx.beginPath(); cx.moveTo(xScale.left, yT); cx.lineTo(xScale.right, yT); cx.stroke();
+          cx.restore();
+        }
+        scenarios.forEach(sc => {
+          if (!sc.edadIF) return;
+          const xi = labels.indexOf('Edad ' + sc.edadIF);
+          if (xi === -1) return;
+          const xp = xScale.getPixelForValue(xi);
+          cx.save();
+          cx.setLineDash([5, 4]);
+          cx.strokeStyle = sc.color + '77';
+          cx.lineWidth = 1.5;
+          cx.beginPath(); cx.moveTo(xp, yScale.top); cx.lineTo(xp, yScale.bottom); cx.stroke();
+          cx.fillStyle = sc.color;
+          cx.font = '10px Outfit, sans-serif';
+          cx.textAlign = 'center';
+          cx.fillText('IF ' + sc.edadIF, xp, yScale.top - 5);
+          cx.restore();
+        });
       }
     };
 
     chart = new Chart(ctx, {
-      type: 'bar',
+      type: 'line',
       plugins: [ifLinePlugin],
       data: {
-        labels: labels,
+        labels,
         datasets: [
-          {
-            label: 'Patrimonio',
-            data: dataCrecimiento,
-            backgroundColor: phaseColors.map(c => c + 'cc'),
-            borderColor: phaseColors,
-            borderWidth: 0,
-            borderRadius: 4,
-            order: 1,
-          },
-          {
-            label: 'Capital aportado',
-            data: dataAportado,
-            type: 'line',
-            borderColor: 'rgba(96,165,250,0.6)',
-            backgroundColor: 'rgba(96,165,250,0.06)',
-            borderWidth: 1.5,
-            pointRadius: 0,
-            fill: true,
-            tension: 0.4,
-            order: 0,
-          }
+          { label: 'Pesimista (6%)', data: scenarios[0].chartData, borderColor: scenarios[0].color, backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.3, order: 3 },
+          { label: 'Base (8%)', data: scenarios[1].chartData, borderColor: scenarios[1].color, backgroundColor: 'transparent', borderWidth: 2.5, pointRadius: 0, tension: 0.3, order: 2 },
+          { label: 'Optimista (10%)', data: scenarios[2].chartData, borderColor: scenarios[2].color, backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.3, order: 1 },
+          { label: 'Capital aportado', data: dataAportado, borderColor: 'rgba(96,165,250,0.5)', backgroundColor: 'rgba(96,165,250,0.05)', borderWidth: 1.5, pointRadius: 0, fill: true, tension: 0.3, order: 4 },
         ]
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
+        responsive: true, maintainAspectRatio: false,
         interaction: { mode: 'index', intersect: false },
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: '#1a1e2a',
-            borderColor: 'rgba(255,255,255,0.1)',
-            borderWidth: 1,
-            titleColor: '#f0f1f5',
-            bodyColor: '#8a8fa8',
-            padding: 12,
-            callbacks: {
-              label: function(ctx) {
-                return ' ' + ctx.dataset.label + ': ' + '€' + Math.round(ctx.parsed.y).toLocaleString('es-ES');
-              }
-            }
+            backgroundColor: '#1a1e2a', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1,
+            titleColor: '#f0f1f5', bodyColor: '#8a8fa8', padding: 12,
+            callbacks: { label: ctx => ' ' + ctx.dataset.label + ': €' + Math.round(ctx.parsed.y).toLocaleString('es-ES') }
           }
         },
         scales: {
           x: {
             grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
-            ticks: {
-              color: '#5a5f78', font: { family: 'Outfit', size: 11 },
-              maxRotation: 45,
-              callback: function(val, i) {
-                return i % 2 === 0 ? this.getLabelForValue(val).replace('Edad ', '') : '';
-              }
-            }
+            ticks: { color: '#5a5f78', font: { family: 'Outfit', size: 11 }, maxRotation: 45, callback: function(val, i) { return i % 2 === 0 ? this.getLabelForValue(val).replace('Edad ', '') : ''; } }
           },
           y: {
             grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
-            ticks: {
-              color: '#5a5f78', font: { family: 'DM Mono', size: 11 },
-              callback: v => {
-                if (v >= 1000000) return '€' + (v / 1000000).toFixed(1) + 'M';
-                if (v >= 1000) return '€' + (v / 1000).toFixed(0) + 'k';
-                return '€' + v;
-              }
-            }
+            ticks: { color: '#5a5f78', font: { family: 'DM Mono', size: 11 }, callback: v => { if (v >= 1000000) return '€' + (v/1000000).toFixed(1) + 'M'; if (v >= 1000) return '€' + (v/1000).toFixed(0) + 'k'; return '€' + v; } }
           }
         }
       }
     });
   }
 
-  ['edad', 'capital', 'aportacion', 'renta'].forEach(id => {
+  ['edad', 'capital', 'aportacion', 'renta', 'colchon'].forEach(id => {
     document.getElementById(id).addEventListener('input', calcular);
+  });
+
+  document.querySelectorAll('.sc-col').forEach((el, i) => {
+    el.addEventListener('click', () => {
+      selectedSc = i;
+      if (lastScenarioResults) {
+        updateMetrics(lastScenarioResults, selectedSc, lastCalcParams.colchonAmount, lastCalcParams.rentaMes, lastCalcParams.edad);
+      }
+    });
   });
 
   calcular();
