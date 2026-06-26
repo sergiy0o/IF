@@ -219,6 +219,18 @@
   .chip-input:focus { border-bottom-color: var(--accent); }
   .chip-unit { font-size: 11px; color: var(--text3); }
 
+  .aportacion-hint {
+    display: none; margin-top: 8px;
+    font-size: 12px; color: var(--text3);
+    padding: 7px 10px; border-radius: 7px;
+    background: rgba(251,191,36,0.05);
+    border-left: 2px solid rgba(251,191,36,0.35);
+    line-height: 1.55;
+  }
+  .aportacion-hint.visible { display: block; }
+  .aportacion-hint .hint-val { color: var(--gold); font-family: 'DM Mono', monospace; font-weight: 500; }
+  .aportacion-hint .hint-diff { color: #f87171; font-family: 'DM Mono', monospace; }
+
   .coast-apply {
     margin-top: 6px; display: block; width: 100%;
     background: var(--accent-dim2); border: 1px solid rgba(110,231,183,0.2);
@@ -470,6 +482,7 @@
             </div>
             <span class="field-unit">/mes</span>
           </div>
+          <div id="aportacion-hint" class="aportacion-hint"></div>
         </div>
 
         <div class="field">
@@ -926,6 +939,29 @@
     lastScenarioResults = scenarioResults;
     lastCalcParams = { colchonAmount, rentaMes, edad, INFLATION, TER };
     updateMetrics(scenarioResults[selectedSc], colchonAmount, rentaMes, edad, INFLATION, TER);
+
+    // Hint: required monthly contribution to reach IF by retireAge
+    const hintEl = document.getElementById('aportacion-hint');
+    const selRes = scenarioResults[selectedSc];
+    const hintN  = (retireAge - edad) * 12;
+    if (hintN > 0 && (!selRes.edadIF || selRes.edadIF > retireAge)) {
+      const hintR = (selRes.gross - INFLATION - TER) / 12;
+      const hintF = Math.pow(1 + hintR, hintN);
+      const fvPV  = capital0 * hintF;
+      if (fvPV >= selRes.capNec) {
+        hintEl.innerHTML = 'Sin aportar ya alcanzas los ' + retireAge + ' (costear)';
+      } else {
+        const pmt  = hintR > 0 ? (selRes.capNec - fvPV) * hintR / (hintF - 1) : (selRes.capNec - fvPV) / hintN;
+        const diff = Math.round(pmt) - aportaMes;
+        const extra = diff > 50 ? ' · <span class="hint-diff">+' + fmt(diff) + '/mes</span>' : '';
+        hintEl.innerHTML = 'Para IF a los ' + retireAge + ': <span class="hint-val">' + fmt(Math.round(pmt)) + '/mes</span>' + extra;
+      }
+      hintEl.classList.add('visible');
+    } else {
+      hintEl.innerHTML = '';
+      hintEl.classList.remove('visible');
+    }
+
     drawChart(labels, scenarioResults, dataAportado, scenarioResults[selectedSc].capNec, selectedSc);
   }
 
