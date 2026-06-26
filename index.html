@@ -108,7 +108,6 @@
     display: grid;
     grid-template-columns: 380px 1fr;
     gap: 24px;
-    align-items: start;
   }
 
   @media (max-width: 860px) {
@@ -240,6 +239,18 @@
     transition: background 0.15s, border-color 0.15s;
   }
   .coast-apply:hover { background: var(--accent-dim); border-color: rgba(110,231,183,0.4); }
+
+  .tasa-hint {
+    display: none; margin-top: 8px;
+    font-size: 12px; color: var(--text3);
+    padding: 7px 10px; border-radius: 7px;
+    background: rgba(96,165,250,0.05);
+    border-left: 2px solid rgba(96,165,250,0.35);
+    line-height: 1.55;
+  }
+  .tasa-hint.visible { display: block; }
+  .tasa-hint .tasa-val { color: var(--blue); font-family: 'DM Mono', monospace; font-weight: 500; }
+
 
   .right-col { display: flex; flex-direction: column; gap: 24px; }
 
@@ -439,8 +450,8 @@
 
   <div class="grid-main">
     <!-- LEFT: Inputs -->
-    <div class="fade-up-2">
-      <div class="panel">
+    <div class="fade-up-2" style="display:flex; flex-direction:column">
+      <div class="panel" style="flex:1">
         <div class="panel-title">Parámetros personales</div>
 
         <div class="field">
@@ -486,6 +497,18 @@
         </div>
 
         <div class="field">
+          <label>Ingreso mensual neto</label>
+          <div class="field-suffix">
+            <div class="input-wrap" style="flex:1">
+              <span class="input-prefix">€</span>
+              <input type="text" inputmode="numeric" id="ingreso" class="n-input" placeholder="0">
+            </div>
+            <span class="field-unit">/mes</span>
+          </div>
+          <div id="tasa-hint" class="tasa-hint"></div>
+        </div>
+
+        <div class="field">
           <label>Renta mensual deseada</label>
           <div class="field-suffix">
             <div class="input-wrap" style="flex:1">
@@ -493,17 +516,6 @@
               <input type="text" inputmode="numeric" id="renta" class="n-input" value="1.500">
             </div>
             <span class="field-unit">/mes</span>
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Colchón de liquidez</label>
-          <div class="field-suffix">
-            <div class="input-wrap" style="flex:1">
-              <span class="input-prefix" style="left:14px">🛡</span>
-              <input type="number" id="colchon" value="3" min="0" max="36" step="1">
-            </div>
-            <span class="field-unit">meses en cash</span>
           </div>
         </div>
 
@@ -555,6 +567,7 @@
             </div>
           </div>
         </div>
+
       </div>
     </div>
 
@@ -641,19 +654,12 @@
             Gráfica de evolución del patrimonio hacia la independencia financiera.
           </canvas>
         </div>
-      </div>
-
-      <!-- Breakdown at IF -->
-      <div class="panel">
-        <div class="panel-title" id="bk-title">Desglose en la edad IF · escenario base 8%</div>
+        <div style="height:1px; background:var(--border); margin:24px 0"></div>
+        <div class="panel-title" id="bk-title" style="margin-bottom:16px">Desglose en la edad IF · escenario base 8%</div>
         <div class="breakdown-grid" style="grid-template-columns:repeat(2,1fr)">
           <div class="bk-item inv">
             <div class="bk-label">Capital aportado</div>
             <div class="bk-val blue" id="bk-aportado">—</div>
-          </div>
-          <div class="bk-item" style="border-left-color:var(--purple)">
-            <div class="bk-label">Colchón liquidez</div>
-            <div class="bk-val" style="color:var(--purple)" id="bk-colchon">—</div>
           </div>
           <div class="bk-item ret">
             <div class="bk-label">Retiros hasta 90</div>
@@ -663,7 +669,7 @@
             <div class="bk-label">Ganancia por interés</div>
             <div class="bk-val green" id="bk-ganancia">—</div>
           </div>
-          <div class="bk-item" style="border-left-color:var(--accent); grid-column:1/-1">
+          <div class="bk-item" style="border-left-color:var(--accent)">
             <div class="bk-label">Patrimonio a los 90</div>
             <div class="bk-val" style="color:var(--accent)" id="bk-terminal">—</div>
           </div>
@@ -719,7 +725,7 @@
 
   const fmt = v => '€' + Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
-  const N_INPUT_IDS = ['capital', 'aportacion', 'renta'];
+  const N_INPUT_IDS = ['capital', 'aportacion', 'ingreso', 'renta'];
 
   function applyThousands(el) {
     const cursor = el.selectionStart;
@@ -748,7 +754,7 @@
     calcular();
   }
 
-  function updateMetrics(res, colchonAmount, rentaMes, edad, INFLATION, TER) {
+  function updateMetrics(res, rentaMes, edad, INFLATION, TER) {
     document.getElementById('ret-neta-chip').textContent = ((res.gross - INFLATION - TER) * 100).toFixed(2) + '%';
 
     if (res.edadIF) {
@@ -764,7 +770,7 @@
     }
 
     document.getElementById('if-subline').textContent = res.edadIF
-      ? fmt(res.capNecPortfolio) + ' invertido + ' + fmt(colchonAmount) + ' colchón = ' + fmt(res.capNec) + ' total'
+      ? fmt(res.capNec) + ' capital necesario'
       : 'No alcanzas la IF antes de los 90 con este escenario';
 
     const años = res.edadIF ? res.edadIF - edad : null;
@@ -779,7 +785,6 @@
 
     document.getElementById('bk-title').textContent = 'Desglose · escenario ' + res.label;
     document.getElementById('bk-aportado').textContent = res.edadIF ? fmt(res.totalAportadoEnIF) : '—';
-    document.getElementById('bk-colchon').textContent = fmt(colchonAmount);
     document.getElementById('bk-retiros').textContent = res.edadIF ? fmt(res.retiros65) : '—';
     document.getElementById('bk-ganancia').textContent = res.edadIF ? fmt(Math.max(0, res.ganancia)) : '—';
     document.getElementById('bk-terminal').textContent = fmt(res.terminalValue);
@@ -796,8 +801,6 @@
     const capital0  = parseN('capital')   || 43802;
     const aportaMes = parseN('aportacion');
     const rentaMes  = parseN('renta')     || 2076;
-    const _col      = document.getElementById('colchon').value;
-    const colchonM  = _col === '' ? 1 : (parseInt(_col) || 0);
 
     const activeRate = (parseFloat(document.getElementById('p-ret').value)  || 8)    / 100;
     const INFLATION  = (parseFloat(document.getElementById('p-inf').value)  || 2)    / 100;
@@ -823,7 +826,6 @@
         ['Pesimista','Base','Optimista'][i] + ' (' + SCENARIOS[i].label + ')');
 
     const rentaAnual    = rentaMes * 12;
-    const colchonAmount = colchonM * rentaMes;
     const labels = [];
     for (let a = edad; a <= MAX_AGE; a++) labels.push('Edad ' + a);
 
@@ -846,11 +848,11 @@
       }
 
       let gf = 0.68;
-      let capNec = grossWithdrawal(rentaAnual, gf, flatIRPF) / WR + colchonAmount;
+      let capNec = grossWithdrawal(rentaAnual, gf, flatIRPF) / WR;
       const r1 = simIF(capNec);
       if (r1) {
         gf = Math.max(0, (r1.cap - r1.costB) / r1.cap);
-        capNec = grossWithdrawal(rentaAnual, gf, flatIRPF) / WR + colchonAmount;
+        capNec = grossWithdrawal(rentaAnual, gf, flatIRPF) / WR;
       }
 
       const rAnual = Math.pow(1 + rMes, 12) - 1;
@@ -871,7 +873,7 @@
             const projYears  = Math.max(0, retireAge - a);
             const projCap    = capital * Math.pow(1 + rAnual, projYears);
             const projGf     = projCap > 0 ? Math.max(0, (projCap - costBasis) / projCap) : 0;
-            const projCapNec = grossWithdrawal(rentaAnual, projGf, flatIRPF) / WR + colchonAmount;
+            const projCapNec = grossWithdrawal(rentaAnual, projGf, flatIRPF) / WR;
             if (projCap >= projCapNec) { coastEdad = a; coastCapital = capital; coastCostBasis = costBasis; }
           }
           chartData.push(Math.round(capital));
@@ -899,7 +901,7 @@
       if (idx === 1) dataAportado = chartAportado;
       scenarioResults.push({
         ...sc, flatIRPF, edadIF, coastEdad, coastCapital, coastCostBasis, capitalEnIF, totalAportadoEnIF, costBasisEnIF,
-        capNec, capNecPortfolio: capNec - colchonAmount,
+        capNec,
         chartData, retiros65,
         terminalValue: chartData[chartData.length - 1],
         ganancia: edadIF ? capitalEnIF - capital0 - totalAportadoEnIF : 0,
@@ -937,8 +939,8 @@
     });
 
     lastScenarioResults = scenarioResults;
-    lastCalcParams = { colchonAmount, rentaMes, edad, INFLATION, TER };
-    updateMetrics(scenarioResults[selectedSc], colchonAmount, rentaMes, edad, INFLATION, TER);
+    lastCalcParams = { rentaMes, edad, INFLATION, TER };
+    updateMetrics(scenarioResults[selectedSc], rentaMes, edad, INFLATION, TER);
 
     // Hint: required monthly contribution to reach IF by retireAge
     const hintEl = document.getElementById('aportacion-hint');
@@ -960,6 +962,18 @@
     } else {
       hintEl.innerHTML = '';
       hintEl.classList.remove('visible');
+    }
+
+    // Tasa de ahorro
+    const ingreso = parseN('ingreso');
+    const tasaEl = document.getElementById('tasa-hint');
+    if (ingreso > 0 && aportaMes > 0) {
+      const tasa = (aportaMes / ingreso * 100).toFixed(1);
+      tasaEl.innerHTML = 'Tasa de ahorro: <span class="tasa-val">' + tasa + '%</span>';
+      tasaEl.classList.add('visible');
+    } else {
+      tasaEl.innerHTML = '';
+      tasaEl.classList.remove('visible');
     }
 
     drawChart(labels, scenarioResults, dataAportado, scenarioResults[selectedSc].capNec, selectedSc);
@@ -1149,7 +1163,7 @@
     });
   }
 
-  ['edad','retire-age','capital','aportacion','renta','colchon','p-ret','p-inf','p-ter','p-wr','p-irpf'].forEach(id => {
+  ['edad','retire-age','capital','aportacion','ingreso','renta','p-ret','p-inf','p-ter','p-wr','p-irpf'].forEach(id => {
     document.getElementById(id).addEventListener('input', (e) => {
       if (N_INPUT_IDS.includes(id)) applyThousands(e.target);
       if (!isAutoFilling && ['edad','capital','aportacion'].includes(id)) coastBasisOverride = null;
