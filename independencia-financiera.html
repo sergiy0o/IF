@@ -137,7 +137,7 @@
     pointer-events: none;
   }
 
-  input[type="number"] {
+  input[type="number"], input.n-input {
     width: 100%;
     background: var(--bg3);
     border: 1px solid var(--border2);
@@ -148,11 +148,11 @@
     padding: 11px 14px 11px 34px;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
-    -moz-appearance: textfield;
+    -moz-appearance: textfield; appearance: textfield;
   }
   input[type="number"]::-webkit-outer-spin-button,
   input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
-  input[type="number"]:focus {
+  input[type="number"]:focus, input.n-input:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-dim);
   }
@@ -186,6 +186,30 @@
     font-family: 'DM Mono', monospace;
     font-size: 15px; font-weight: 500; color: var(--accent);
   }
+
+  .chip-row { display: flex; align-items: baseline; gap: 4px; }
+  .chip-input {
+    background: transparent; border: none;
+    border-bottom: 1px solid var(--border2);
+    color: var(--accent); font-family: 'DM Mono', monospace;
+    font-size: 15px; font-weight: 500; width: 56px;
+    outline: none; padding: 0 2px;
+    -moz-appearance: textfield; appearance: textfield;
+  }
+  .chip-input::-webkit-outer-spin-button,
+  .chip-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .chip-input:focus { border-bottom-color: var(--accent); }
+  .chip-unit { font-size: 11px; color: var(--text3); }
+
+  .coast-apply {
+    margin-top: 6px; display: block; width: 100%;
+    background: var(--accent-dim2); border: 1px solid rgba(110,231,183,0.2);
+    border-radius: 6px; color: var(--accent2); font-size: 10px;
+    font-family: 'DM Mono', monospace; padding: 5px 8px;
+    cursor: pointer; text-align: left;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .coast-apply:hover { background: var(--accent-dim); border-color: rgba(110,231,183,0.4); }
 
   .right-col { display: flex; flex-direction: column; gap: 24px; }
 
@@ -387,10 +411,21 @@
         </div>
 
         <div class="field">
+          <label>Edad objetivo IF</label>
+          <div class="field-suffix">
+            <div class="input-wrap" style="flex:1">
+              <span class="input-prefix" style="left:14px">🎯</span>
+              <input type="number" id="retire-age" value="65" min="30" max="80" step="1">
+            </div>
+            <span class="field-unit">años</span>
+          </div>
+        </div>
+
+        <div class="field">
           <label>Capital inicial invertido</label>
           <div class="input-wrap">
             <span class="input-prefix">€</span>
-            <input type="number" id="capital" value="43802" min="0" step="1000">
+            <input type="text" inputmode="numeric" id="capital" class="n-input" value="43.802">
           </div>
         </div>
 
@@ -399,7 +434,7 @@
           <div class="field-suffix">
             <div class="input-wrap" style="flex:1">
               <span class="input-prefix">€</span>
-              <input type="number" id="aportacion" value="720" min="0" step="50">
+              <input type="text" inputmode="numeric" id="aportacion" class="n-input" value="720">
             </div>
             <span class="field-unit">/mes</span>
           </div>
@@ -410,7 +445,7 @@
           <div class="field-suffix">
             <div class="input-wrap" style="flex:1">
               <span class="input-prefix">€</span>
-              <input type="number" id="renta" value="2076" min="100" step="100">
+              <input type="text" inputmode="numeric" id="renta" class="n-input" value="2.076">
             </div>
             <span class="field-unit">/mes</span>
           </div>
@@ -432,28 +467,47 @@
         <div class="panel-title">Parámetros del fondo (fijos)</div>
         <div class="fixed-params">
           <div class="param-chip">
-            <div class="chip-label">Rentabilidad bruta</div>
-            <div class="chip-value" id="ret-bruta-chip">10.00%</div>
+            <div class="chip-label">Ret. bruta (activo)</div>
+            <div class="chip-row">
+              <input type="number" id="p-ret" class="chip-input" value="8" min="1" max="30" step="0.5">
+              <span class="chip-unit">%</span>
+            </div>
           </div>
           <div class="param-chip">
             <div class="chip-label">Inflación esperada</div>
-            <div class="chip-value">2.00%</div>
+            <div class="chip-row">
+              <input type="number" id="p-inf" class="chip-input" value="2" min="0" max="10" step="0.1">
+              <span class="chip-unit">%</span>
+            </div>
           </div>
           <div class="param-chip">
             <div class="chip-label">TER (comisiones)</div>
-            <div class="chip-value">0.06%</div>
+            <div class="chip-row">
+              <input type="number" id="p-ter" class="chip-input" value="0.06" min="0" max="2" step="0.01">
+              <span class="chip-unit">%</span>
+            </div>
+          </div>
+          <div class="param-chip">
+            <div class="chip-label">IRPF ganancias (vacío=tramos)</div>
+            <div class="chip-row">
+              <input type="number" id="p-irpf" class="chip-input" placeholder="—" min="0" max="50" step="1">
+              <span class="chip-unit">%</span>
+            </div>
           </div>
           <div class="param-chip">
             <div class="chip-label">Ret. neta real</div>
             <div class="chip-value" id="ret-neta-chip">7.94%</div>
           </div>
           <div class="param-chip">
-            <div class="chip-label">Fracción ganancia IF</div>
-            <div class="chip-value" id="gain-frac-chip">—</div>
+            <div class="chip-label">IRPF efectivo s/ ganancia</div>
+            <div class="chip-value" id="irpf-efectivo-chip">—</div>
           </div>
           <div class="param-chip" style="grid-column:1/-1">
-            <div class="chip-label">Regla de retirada segura</div>
-            <div class="chip-value">3.50% anual</div>
+            <div class="chip-label">Tasa de retirada segura</div>
+            <div class="chip-row">
+              <input type="number" id="p-wr" class="chip-input" value="3.5" min="1" max="10" step="0.1">
+              <span class="chip-unit">% anual</span>
+            </div>
           </div>
         </div>
       </div>
@@ -467,21 +521,21 @@
         <div class="scenarios-banner">
           <div class="sc-col">
             <div class="sc-col-emoji">🐻</div>
-            <div class="sc-col-label">Pesimista · 6%</div>
+            <div class="sc-col-label">Pesimista · <span id="sc-pct-0">6%</span></div>
             <div class="sc-col-age red" id="sc-edad-pes">—</div>
             <div class="sc-col-sub" id="sc-sub-pes">—</div>
             <div class="sc-col-coast" id="sc-coast-pes">—</div>
           </div>
           <div class="sc-col">
             <div class="sc-col-emoji">📊</div>
-            <div class="sc-col-label">Base · 8%</div>
+            <div class="sc-col-label">Base · <span id="sc-pct-1">8%</span></div>
             <div class="sc-col-age gold" id="sc-edad-base">—</div>
             <div class="sc-col-sub" id="sc-sub-base">—</div>
             <div class="sc-col-coast" id="sc-coast-base">—</div>
           </div>
           <div class="sc-col">
             <div class="sc-col-emoji">🚀</div>
-            <div class="sc-col-label">Optimista · 10%</div>
+            <div class="sc-col-label">Optimista · <span id="sc-pct-2">10%</span></div>
             <div class="sc-col-age green" id="sc-edad-opt">—</div>
             <div class="sc-col-sub" id="sc-sub-opt">—</div>
             <div class="sc-col-coast" id="sc-coast-opt">—</div>
@@ -521,15 +575,15 @@
           <div class="legend">
             <div class="legend-item">
               <div class="legend-dot" style="background:#f87171"></div>
-              <span>Pesimista (6%)</span>
+              <span id="legend-lbl-0">Pesimista (6%)</span>
             </div>
             <div class="legend-item">
               <div class="legend-dot" style="background:#fbbf24"></div>
-              <span>Base (8%)</span>
+              <span id="legend-lbl-1">Base (8%)</span>
             </div>
             <div class="legend-item">
               <div class="legend-dot" style="background:#6ee7b7"></div>
-              <span>Optimista (10%)</span>
+              <span id="legend-lbl-2">Optimista (10%)</span>
             </div>
             <div class="legend-item">
               <div class="legend-dot" style="background:#60a5fa; opacity:0.5"></div>
@@ -576,42 +630,93 @@
 
   <footer class="fade-up-4">
     <span class="tag">📊 Simulación orientativa</span>
-    <p style="margin-top:12px">Rentabilidades pasadas no garantizan resultados futuros · Datos en términos reales (ajustados por inflación) · TER incluido en cálculo</p>
+    <p style="margin-top:12px">Rentabilidades pasadas no garantizan resultados futuros · Datos en términos reales (ajustados por inflación) · IRPF aplicado por tramos progresivos (España 2024)</p>
   </footer>
 </div>
 
 <script>
-  const GROSS_RETURN = 0.10;
-  const INFLATION = 0.02;
-  const TER = 0.0006;
-  const NET_REAL = GROSS_RETURN - INFLATION - TER;
-  const WITHDRAWAL_RATE = 0.035;
-  const IRPF_GAIN_RATE = 0.20;
   const MAX_AGE = 90;
 
-  const SCENARIOS = [
-    { gross: 0.06, label: '6%', color: '#f87171' },
-    { gross: 0.08, label: '8%', color: '#fbbf24' },
-    { gross: 0.10, label: '10%', color: '#6ee7b7' },
+  // Tramos IRPF base del ahorro (España 2024)
+  const IRPF_BRACKETS = [
+    { up: 6000,     rate: 0.19 },
+    { up: 50000,    rate: 0.21 },
+    { up: 200000,   rate: 0.23 },
+    { up: 300000,   rate: 0.27 },
+    { up: Infinity, rate: 0.28 },
   ];
 
-  const fmt = (v) => '€' + Math.round(v).toLocaleString('es-ES');
+  function irpfOnGain(gain) {
+    if (gain <= 0) return 0;
+    let tax = 0, prev = 0;
+    for (const b of IRPF_BRACKETS) {
+      if (gain <= prev) break;
+      const slice = Math.min(gain, b.up) - prev;
+      tax += slice * b.rate;
+      prev = b.up;
+    }
+    return tax;
+  }
 
-  let chart;
-  let lastScenarioResults = null;
-  let lastCalcParams = null;
-  let selectedSc = 1;
+  // Retiro bruto necesario para recibir netAnnual neto, dada fracción de ganancia gf.
+  // flatIRPF > 0 usa tipo fijo; si 0, aplica tramos progresivos.
+  function grossWithdrawal(netAnnual, gf, flatIRPF) {
+    if (gf <= 0) return netAnnual;
+    if (flatIRPF > 0) return netAnnual / (1 - flatIRPF * gf);
+    let gross = netAnnual / (1 - 0.21 * gf);
+    for (let i = 0; i < 8; i++) {
+      const next = netAnnual + irpfOnGain(gross * gf);
+      if (Math.abs(next - gross) < 0.01) { gross = next; break; }
+      gross = next;
+    }
+    return gross;
+  }
 
-  function updateMetrics(scenarioResults, selIdx, colchonAmount, rentaMes, edad) {
-    const res = scenarioResults[selIdx];
-    const netReal = res.gross - INFLATION - TER;
-    document.getElementById('ret-bruta-chip').textContent = (res.gross * 100).toFixed(2) + '%';
-    document.getElementById('ret-neta-chip').textContent = (netReal * 100).toFixed(2) + '%';
+  const fmt = v => '€' + Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
-    const gainFracIF = res.edadIF
-      ? ((res.capitalEnIF - res.costBasisEnIF) / res.capitalEnIF * 100).toFixed(1) + '%'
-      : '—';
-    document.getElementById('gain-frac-chip').textContent = gainFracIF;
+  const N_INPUT_IDS = ['capital', 'aportacion', 'renta'];
+
+  function applyThousands(el) {
+    const cursor = el.selectionStart;
+    const oldLen = el.value.length;
+    const digits = el.value.replace(/\./g, '').replace(/\D/g, '');
+    el.value = digits ? digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+    const delta = el.value.length - oldLen;
+    el.setSelectionRange(cursor + delta, cursor + delta);
+  }
+
+  function parseN(id) {
+    return parseFloat(document.getElementById(id).value.replace(/\./g, '')) || 0;
+  }
+
+  let chart, lastScenarioResults, lastCalcParams, selectedSc = 1;
+  let coastBasisOverride = null, isAutoFilling = false;
+
+  function applyCoast(coastEdad, coastCapital, coastCostBasis) {
+    isAutoFilling = true;
+    coastBasisOverride = coastCostBasis;
+    document.getElementById('edad').value = coastEdad;
+    document.getElementById('capital').value =
+      String(Math.round(coastCapital)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    document.getElementById('aportacion').value = 0;
+    isAutoFilling = false;
+    calcular();
+  }
+
+  function updateMetrics(res, colchonAmount, rentaMes, edad, INFLATION, TER) {
+    document.getElementById('ret-neta-chip').textContent = ((res.gross - INFLATION - TER) * 100).toFixed(2) + '%';
+
+    if (res.edadIF) {
+      const rentaAnual = rentaMes * 12;
+      const gf = Math.max(0, (res.capitalEnIF - res.costBasisEnIF) / res.capitalEnIF);
+      const grossAnual = grossWithdrawal(rentaAnual, gf, res.flatIRPF);
+      const tax = grossAnual - rentaAnual;
+      const gainBase = grossAnual * gf;
+      const pct = gainBase > 0 ? (tax / gainBase * 100).toFixed(1) : '0.0';
+      document.getElementById('irpf-efectivo-chip').textContent = pct + '% · ' + fmt(tax) + '/año';
+    } else {
+      document.getElementById('irpf-efectivo-chip').textContent = '—';
+    }
 
     document.getElementById('if-subline').textContent = res.edadIF
       ? fmt(res.capNecPortfolio) + ' invertido + ' + fmt(colchonAmount) + ' colchón = ' + fmt(res.capNec) + ' total'
@@ -636,22 +741,44 @@
 
     document.querySelectorAll('.sc-col').forEach((el, i) => {
       el.classList.remove('sc-selected-0', 'sc-selected-1', 'sc-selected-2');
-      if (i === selIdx) el.classList.add('sc-selected-' + selIdx);
+      if (i === selectedSc) el.classList.add('sc-selected-' + selectedSc);
     });
   }
 
   function calcular() {
-    const edad = parseInt(document.getElementById('edad').value) || 34;
-    const capital0 = parseFloat(document.getElementById('capital').value) || 43802;
-    const _ap = document.getElementById('aportacion').value;
-    const aportacionMes = _ap === '' ? 720 : (parseFloat(_ap) || 0);
-    const rentaMes = parseFloat(document.getElementById('renta').value) || 2076;
-    const _col = document.getElementById('colchon').value;
-    const colchonMeses = _col === '' ? 12 : (parseInt(_col) || 0);
+    const edad       = parseInt(document.getElementById('edad').value) || 34;
+    const retireAge  = Math.max(edad + 1, parseInt(document.getElementById('retire-age').value) || 65);
+    const capital0  = parseN('capital')   || 43802;
+    const aportaMes = parseN('aportacion');
+    const rentaMes  = parseN('renta')     || 2076;
+    const _col      = document.getElementById('colchon').value;
+    const colchonM  = _col === '' ? 1 : (parseInt(_col) || 0);
 
-    const rentaAnual = rentaMes * 12;
-    const colchonAmount = colchonMeses * rentaMes;
+    const activeRate = (parseFloat(document.getElementById('p-ret').value)  || 8)    / 100;
+    const INFLATION  = (parseFloat(document.getElementById('p-inf').value)  || 2)    / 100;
+    const TER        = (parseFloat(document.getElementById('p-ter').value)  || 0.06) / 100;
+    const WR         = (parseFloat(document.getElementById('p-wr').value)   || 3.5)  / 100;
+    const _ir        = document.getElementById('p-irpf').value.trim();
+    const flatIRPF   = (_ir === '' || +_ir === 0) ? 0 : +_ir / 100;
 
+    // p-ret siempre muestra la tasa del escenario seleccionado; offset fijo ±2%/±4%
+    const SC_OFFSETS = [0.04, 0.02, 0];
+    const baseRet = activeRate + SC_OFFSETS[selectedSc];
+
+    const SCENARIOS = [
+      { gross: Math.max(0.005, baseRet - 0.04), color: '#f87171' },
+      { gross: Math.max(0.005, baseRet - 0.02), color: '#fbbf24' },
+      { gross: baseRet,                          color: '#6ee7b7' },
+    ].map(sc => ({ ...sc, label: (sc.gross * 100).toFixed(0) + '%' }));
+
+    ['sc-pct-0','sc-pct-1','sc-pct-2'].forEach((id, i) =>
+      document.getElementById(id).textContent = SCENARIOS[i].label);
+    ['legend-lbl-0','legend-lbl-1','legend-lbl-2'].forEach((id, i) =>
+      document.getElementById(id).textContent =
+        ['Pesimista','Base','Optimista'][i] + ' (' + SCENARIOS[i].label + ')');
+
+    const rentaAnual    = rentaMes * 12;
+    const colchonAmount = colchonM * rentaMes;
     const labels = [];
     for (let a = edad; a <= MAX_AGE; a++) labels.push('Edad ' + a);
 
@@ -665,8 +792,8 @@
         let cap = capital0, costB = capital0;
         for (let a = edad; a <= MAX_AGE; a++) {
           if (a > edad) {
-            for (let m = 0; m < 12; m++) cap = cap * (1 + rMes) + aportacionMes;
-            costB += aportacionMes * 12;
+            for (let m = 0; m < 12; m++) cap = cap * (1 + rMes) + aportaMes;
+            costB += aportaMes * 12;
           }
           if (cap >= capNec) return { cap, costB };
         }
@@ -674,28 +801,33 @@
       }
 
       let gf = 0.68;
-      let capNec = (rentaAnual / (1 - IRPF_GAIN_RATE * gf)) / WITHDRAWAL_RATE + colchonAmount;
+      let capNec = grossWithdrawal(rentaAnual, gf, flatIRPF) / WR + colchonAmount;
       const r1 = simIF(capNec);
       if (r1) {
         gf = Math.max(0, (r1.cap - r1.costB) / r1.cap);
-        capNec = (rentaAnual / (1 - IRPF_GAIN_RATE * gf)) / WITHDRAWAL_RATE + colchonAmount;
+        capNec = grossWithdrawal(rentaAnual, gf, flatIRPF) / WR + colchonAmount;
       }
 
       const rAnual = Math.pow(1 + rMes, 12) - 1;
       const chartData = [], chartAportado = [];
-      let capital = capital0, totalAportado = 0, costBasis = capital0;
+      const initialCostBasis = coastBasisOverride !== null ? coastBasisOverride : capital0;
+      let capital = capital0, totalAportado = 0, costBasis = initialCostBasis;
       let ifFound = false, edadIF = null, capitalEnIF = 0, totalAportadoEnIF = 0, costBasisEnIF = capital0;
-      let retiros65 = 0, coastEdad = null;
+      let retiros65 = 0, coastEdad = null, coastCapital = null, coastCostBasis = null;
 
       for (let a = edad; a <= MAX_AGE; a++) {
         if (!ifFound) {
           if (a > edad) {
-            for (let m = 0; m < 12; m++) capital = capital * (1 + rMes) + aportacionMes;
-            totalAportado += aportacionMes * 12;
-            costBasis += aportacionMes * 12;
+            for (let m = 0; m < 12; m++) capital = capital * (1 + rMes) + aportaMes;
+            totalAportado += aportaMes * 12;
+            costBasis += aportaMes * 12;
           }
-          if (!coastEdad && capital * Math.pow(1 + rAnual, MAX_AGE - a) >= capNec) {
-            coastEdad = a;
+          if (!coastEdad) {
+            const projYears  = Math.max(0, retireAge - a);
+            const projCap    = capital * Math.pow(1 + rAnual, projYears);
+            const projGf     = projCap > 0 ? Math.max(0, (projCap - costBasis) / projCap) : 0;
+            const projCapNec = grossWithdrawal(rentaAnual, projGf, flatIRPF) / WR + colchonAmount;
+            if (projCap >= projCapNec) { coastEdad = a; coastCapital = capital; coastCostBasis = costBasis; }
           }
           chartData.push(Math.round(capital));
           chartAportado.push(Math.round(totalAportado));
@@ -704,9 +836,9 @@
             capitalEnIF = capital; totalAportadoEnIF = totalAportado; costBasisEnIF = costBasis;
           }
         } else {
+          const gfNow   = capital > 0 ? Math.max(0, (capital - costBasis) / capital) : 0;
+          const grossMes = grossWithdrawal(rentaAnual, gfNow, flatIRPF) / 12;
           const capAntes = capital;
-          const gfNow = capital > 0 ? Math.max(0, (capital - costBasis) / capital) : 0;
-          const grossMes = rentaMes / Math.max(0.01, 1 - IRPF_GAIN_RATE * gfNow);
           for (let m = 0; m < 12; m++) {
             capital = capital * (1 + rMes) - grossMes;
             if (capital < 0) capital = 0;
@@ -720,9 +852,8 @@
       }
 
       if (idx === 1) dataAportado = chartAportado;
-
       scenarioResults.push({
-        ...sc, edadIF, coastEdad, capitalEnIF, totalAportadoEnIF, costBasisEnIF,
+        ...sc, flatIRPF, edadIF, coastEdad, coastCapital, coastCostBasis, capitalEnIF, totalAportadoEnIF, costBasisEnIF,
         capNec, capNecPortfolio: capNec - colchonAmount,
         chartData, retiros65,
         terminalValue: chartData[chartData.length - 1],
@@ -732,9 +863,9 @@
     });
 
     const scIds = [
-      ['sc-edad-pes', 'sc-sub-pes', 'sc-coast-pes'],
-      ['sc-edad-base', 'sc-sub-base', 'sc-coast-base'],
-      ['sc-edad-opt', 'sc-sub-opt', 'sc-coast-opt'],
+      ['sc-edad-pes','sc-sub-pes','sc-coast-pes'],
+      ['sc-edad-base','sc-sub-base','sc-coast-base'],
+      ['sc-edad-opt','sc-sub-opt','sc-coast-opt'],
     ];
     scenarioResults.forEach((res, i) => {
       const [eid, sid, cid] = scIds[i];
@@ -743,18 +874,26 @@
         ? (res.edadIF - edad) + 'a desde hoy' : 'fuera de rango';
       const coastEl = document.getElementById(cid);
       if (res.coastEdad) {
-        const coastAños = res.coastEdad - edad;
+        const ca = res.coastEdad - edad;
+        const btn = res.coastCapital
+          ? '<button class="coast-apply" onclick="applyCoast('
+              + res.coastEdad + ','
+              + Math.round(res.coastCapital) + ','
+              + Math.round(res.coastCostBasis) + ')">'
+              + '▶ Simular desde los ' + res.coastEdad + ' · ' + fmt(res.coastCapital) + ' · sin aportación'
+              + '</button>'
+          : '';
         coastEl.innerHTML = 'Puedes dejar de aportar a los <span>' + res.coastEdad + '</span> años'
-          + (coastAños <= 0 ? ' · ¡ya ahora!' : ' · en ' + coastAños + 'a');
+          + (ca <= 0 ? ' · ¡ya ahora!' : ' · en ' + ca + 'a')
+          + ' (IF a los ' + retireAge + ')' + btn;
       } else {
-        coastEl.innerHTML = 'Necesitas aportar hasta los 90';
+        coastEl.innerHTML = 'No alcanzas IF a los ' + retireAge + ' costeando';
       }
     });
 
     lastScenarioResults = scenarioResults;
-    lastCalcParams = { colchonAmount, rentaMes, edad };
-    updateMetrics(scenarioResults, selectedSc, colchonAmount, rentaMes, edad);
-
+    lastCalcParams = { colchonAmount, rentaMes, edad, INFLATION, TER };
+    updateMetrics(scenarioResults[selectedSc], colchonAmount, rentaMes, edad, INFLATION, TER);
     drawChart(labels, scenarioResults, dataAportado, scenarioResults[selectedSc].capNec);
   }
 
@@ -800,9 +939,9 @@
       data: {
         labels,
         datasets: [
-          { label: 'Pesimista (6%)', data: scenarios[0].chartData, borderColor: scenarios[0].color, backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.3, order: 3 },
-          { label: 'Base (8%)', data: scenarios[1].chartData, borderColor: scenarios[1].color, backgroundColor: 'transparent', borderWidth: 2.5, pointRadius: 0, tension: 0.3, order: 2 },
-          { label: 'Optimista (10%)', data: scenarios[2].chartData, borderColor: scenarios[2].color, backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.3, order: 1 },
+          { label: 'Pesimista (' + scenarios[0].label + ')', data: scenarios[0].chartData, borderColor: scenarios[0].color, backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.3, order: 3 },
+          { label: 'Base ('      + scenarios[1].label + ')', data: scenarios[1].chartData, borderColor: scenarios[1].color, backgroundColor: 'transparent', borderWidth: 2.5, pointRadius: 0, tension: 0.3, order: 2 },
+          { label: 'Optimista (' + scenarios[2].label + ')', data: scenarios[2].chartData, borderColor: scenarios[2].color, backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.3, order: 1 },
           { label: 'Capital aportado', data: dataAportado, borderColor: 'rgba(96,165,250,0.5)', backgroundColor: 'rgba(96,165,250,0.05)', borderWidth: 1.5, pointRadius: 0, fill: true, tension: 0.3, order: 4 },
         ]
       },
@@ -831,16 +970,22 @@
     });
   }
 
-  ['edad', 'capital', 'aportacion', 'renta', 'colchon'].forEach(id => {
-    document.getElementById(id).addEventListener('input', calcular);
+  ['edad','retire-age','capital','aportacion','renta','colchon','p-ret','p-inf','p-ter','p-wr','p-irpf'].forEach(id => {
+    document.getElementById(id).addEventListener('input', (e) => {
+      if (N_INPUT_IDS.includes(id)) applyThousands(e.target);
+      if (!isAutoFilling && ['edad','capital','aportacion'].includes(id)) coastBasisOverride = null;
+      calcular();
+    });
   });
 
   document.querySelectorAll('.sc-col').forEach((el, i) => {
     el.addEventListener('click', () => {
       selectedSc = i;
       if (lastScenarioResults) {
-        updateMetrics(lastScenarioResults, selectedSc, lastCalcParams.colchonAmount, lastCalcParams.rentaMes, lastCalcParams.edad);
+        document.getElementById('p-ret').value =
+          (lastScenarioResults[i].gross * 100).toFixed(1);
       }
+      calcular();
     });
   });
 
