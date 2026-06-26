@@ -76,7 +76,7 @@
 
   .header-label {
     display: inline-flex; align-items: center; gap: 8px;
-    font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+    font-size: 12px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
     color: var(--accent2); margin-bottom: 16px;
   }
   .header-label::before {
@@ -125,7 +125,7 @@
   }
 
   .panel-title {
-    font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
     color: var(--text3); margin-bottom: 20px;
     padding-bottom: 14px; border-bottom: 1px solid var(--border);
   }
@@ -197,7 +197,7 @@
     border-color: rgba(110,231,183,0.3);
   }
   .param-chip .chip-label {
-    font-size: 11px; color: var(--text3); margin-bottom: 4px;
+    font-size: 12px; color: var(--text3); margin-bottom: 4px;
   }
   .param-chip .chip-value {
     font-family: 'DM Mono', monospace;
@@ -216,7 +216,7 @@
   .chip-input::-webkit-outer-spin-button,
   .chip-input::-webkit-inner-spin-button { -webkit-appearance: none; }
   .chip-input:focus { border-bottom-color: var(--accent); }
-  .chip-unit { font-size: 11px; color: var(--text3); }
+  .chip-unit { font-size: 12px; color: var(--text3); }
 
   .aportacion-hint {
     display: none; margin-top: 8px;
@@ -233,7 +233,7 @@
   .coast-apply {
     margin-top: 6px; display: block; width: 100%;
     background: var(--accent-dim2); border: 1px solid rgba(110,231,183,0.2);
-    border-radius: 6px; color: var(--accent2); font-size: 10px;
+    border-radius: 6px; color: var(--accent2); font-size: 12px;
     font-family: 'DM Mono', monospace; padding: 5px 8px;
     cursor: pointer; text-align: left;
     transition: background 0.15s, border-color 0.15s;
@@ -284,7 +284,7 @@
   }
 
   .metric-label {
-    font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
     color: var(--text3); margin-bottom: 12px;
   }
 
@@ -375,7 +375,7 @@
   }
   .sc-col-emoji { font-size: 20px; margin-bottom: 6px; }
   .sc-col-label {
-    font-size: 10px; color: var(--text3); text-transform: uppercase;
+    font-size: 12px; color: var(--text3); text-transform: uppercase;
     letter-spacing: 0.1em; font-weight: 600; margin-bottom: 8px;
   }
   .sc-col-age {
@@ -385,7 +385,7 @@
   .sc-col-age.gold { color: var(--gold); }
   .sc-col-age.green { color: var(--accent); }
   .sc-col-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
-  .sc-col-coast { font-size: 11px; color: var(--text3); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+  .sc-col-coast { font-size: 12px; color: var(--text3); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
   .sc-col-coast span { color: var(--accent2); font-weight: 600; }
   .if-note { font-size: 12px; color: var(--text2); }
 
@@ -405,7 +405,7 @@
   .bk-item.ret { border-left-color: var(--gold); }
   .bk-item.gai { border-left-color: var(--accent); }
 
-  .bk-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+  .bk-label { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
   .bk-val { font-family: 'DM Mono', monospace; font-size: 17px; font-weight: 500; }
   .bk-val.blue { color: var(--blue); }
   .bk-val.gold { color: var(--gold); }
@@ -421,7 +421,7 @@
     display: inline-flex; align-items: center; gap: 4px;
     background: var(--accent-dim2); color: var(--accent2);
     border: 1px solid rgba(110,231,183,0.15);
-    border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 500;
+    border-radius: 20px; padding: 3px 10px; font-size: 12px; font-weight: 500;
   }
 
   @keyframes fadeUp {
@@ -544,7 +544,7 @@
               <input type="number" id="p-ter" class="chip-input" value="0.06" min="0" max="2" step="0.01">
               <span class="chip-unit">%</span>
             </div>
-            <div style="font-size:10px; color:var(--text3); margin-top:6px; line-height:1.4">Si inviertes en fondos indexados, el TER es la comisión anual del fondo.</div>
+            <div style="font-size:12px; color:var(--text3); margin-top:6px; line-height:1.4">Si inviertes en fondos indexados, el TER es la comisión anual del fondo.</div>
           </div>
           <div class="param-chip">
             <div class="chip-label">IRPF ganancias (vacío=tramos)</div>
@@ -558,14 +558,26 @@
             <div class="chip-value" id="ret-neta-chip">7.94%</div>
           </div>
           <div class="param-chip">
-            <div class="chip-label">IRPF efectivo s/ ganancia</div>
-            <div class="chip-value" id="irpf-efectivo-chip">—</div>
-          </div>
-          <div class="param-chip" style="grid-column:1/-1">
             <div class="chip-label">Tasa de retirada segura</div>
             <div class="chip-row">
               <input type="number" id="p-wr" class="chip-input" value="3.5" min="1" max="10" step="0.1">
               <span class="chip-unit">% anual</span>
+            </div>
+          </div>
+          <div class="param-chip" style="grid-column:1/-1">
+            <div class="chip-label">IRPF efectivo s/ ganancia</div>
+            <div class="chip-value" id="irpf-efectivo-chip">—</div>
+            <div style="margin-top:8px; font-size:12px; color:var(--text3); line-height:1.5; padding:7px 10px; border-radius:7px; background:rgba(96,165,250,0.05); border-left:2px solid rgba(96,165,250,0.3)">El IRPF se aplica solo sobre la parte de ganancia de cada retiro, no sobre el capital aportado. A mayor antigüedad del fondo, mayor proporción de ganancia y mayor impacto fiscal.</div>
+            <div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:6px 14px; font-size:12px; color:var(--text3); font-family:'DM Mono',monospace; line-height:1.6">
+              <span>0–6.000€ <span style="color:var(--accent2)">19%</span></span>
+              <span style="color:var(--border2)">·</span>
+              <span>6k–50k€ <span style="color:var(--accent2)">21%</span></span>
+              <span style="color:var(--border2)">·</span>
+              <span>50k–200k€ <span style="color:var(--accent2)">23%</span></span>
+              <span style="color:var(--border2)">·</span>
+              <span>200k–300k€ <span style="color:var(--accent2)">27%</span></span>
+              <span style="color:var(--border2)">·</span>
+              <span>>300k€ <span style="color:var(--accent2)">28%</span></span>
             </div>
           </div>
         </div>
@@ -578,7 +590,7 @@
 
       <!-- IF Banner: tres escenarios -->
       <div class="if-banner">
-        <div style="font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--text3); margin-bottom:4px">Elige uno de los tres escenarios</div>
+        <div style="font-size:12px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--text3); margin-bottom:4px">Elige uno de los tres escenarios</div>
         <div class="scenarios-banner">
           <div class="sc-col">
             <div class="sc-col-emoji">🐻</div>
