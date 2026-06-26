@@ -770,7 +770,7 @@
   }
 
   function updateMetrics(res, rentaMes, edad, INFLATION, TER) {
-    document.getElementById('ret-neta-chip').textContent = ((res.gross - INFLATION - TER) * 100).toFixed(2) + '%';
+    document.getElementById('ret-neta-chip').textContent = (((1 + res.gross - TER) / (1 + INFLATION) - 1) * 100).toFixed(2) + '%';
 
     if (res.edadIF) {
       const rentaAnual = rentaMes * 12;
@@ -848,7 +848,8 @@
     const scenarioResults = [];
 
     SCENARIOS.forEach((sc, idx) => {
-      const rMes = (sc.gross - INFLATION - TER) / 12;
+      const rAnualReal = (1 + sc.gross - TER) / (1 + INFLATION) - 1;
+      const rMes = Math.pow(1 + rAnualReal, 1 / 12) - 1;
 
       function simIF(capNec) {
         let cap = capital0, costB = capital0;
