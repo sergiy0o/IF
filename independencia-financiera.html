@@ -39,7 +39,11 @@
 
   body {
     font-family: 'Outfit', sans-serif;
-    background: var(--bg);
+    background:
+      radial-gradient(ellipse 90% 50% at 50% -5%, rgba(110,231,183,0.07) 0%, transparent 55%),
+      radial-gradient(ellipse 60% 60% at 90% 85%, rgba(167,139,250,0.07) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 40% at 5% 60%, rgba(96,165,250,0.05) 0%, transparent 45%),
+      var(--bg);
     color: var(--text);
     min-height: 100vh;
     line-height: 1.6;
@@ -53,10 +57,11 @@
 
   .glow-orb {
     position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
-    filter: blur(120px); opacity: 0.15;
+    filter: blur(140px); opacity: 0.2;
   }
-  .glow-orb.g1 { width: 600px; height: 600px; top: -200px; right: -100px; background: var(--accent); }
-  .glow-orb.g2 { width: 400px; height: 400px; bottom: -100px; left: -100px; background: var(--purple); }
+  .glow-orb.g1 { width: 700px; height: 700px; top: -250px; right: -150px; background: var(--accent); }
+  .glow-orb.g2 { width: 500px; height: 500px; bottom: -150px; left: -150px; background: var(--purple); }
+  .glow-orb.g3 { width: 350px; height: 350px; top: 40%; left: 35%; background: var(--blue); opacity: 0.07; }
 
   .container {
     position: relative; z-index: 1;
@@ -89,7 +94,10 @@
 
   h1 em {
     font-style: italic;
-    color: var(--accent);
+    background: linear-gradient(90deg, var(--accent) 0%, #a7f3d0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   .header-sub {
@@ -108,15 +116,19 @@
   }
 
   .panel {
-    background: var(--bg2);
-    border: 1px solid var(--border);
+    background: rgba(19,22,30,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.09);
     border-radius: 20px;
     padding: 28px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
   }
 
   .panel-title {
     font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
-    color: var(--text3); margin-bottom: 24px;
+    color: var(--text3); margin-bottom: 20px;
+    padding-bottom: 14px; border-bottom: 1px solid var(--border);
   }
 
   .field { margin-bottom: 20px; }
@@ -139,22 +151,23 @@
 
   input[type="number"], input.n-input {
     width: 100%;
-    background: var(--bg3);
+    background: rgba(26,30,42,0.9);
     border: 1px solid var(--border2);
     border-radius: 10px;
     color: var(--text);
     font-family: 'DM Mono', monospace;
     font-size: 15px;
-    padding: 11px 14px 11px 34px;
+    padding: 12px 14px 12px 34px;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
     -moz-appearance: textfield; appearance: textfield;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.25);
   }
   input[type="number"]::-webkit-outer-spin-button,
   input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
   input[type="number"]:focus, input.n-input:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-dim);
+    box-shadow: 0 0 0 3px rgba(110,231,183,0.14), inset 0 1px 3px rgba(0,0,0,0.25);
   }
 
   .field-suffix {
@@ -174,10 +187,15 @@
   }
 
   .param-chip {
-    background: var(--bg3);
-    border: 1px solid var(--border);
+    background: rgba(26,30,42,0.8);
+    border: 1px solid rgba(255,255,255,0.07);
     border-radius: 10px;
     padding: 12px 14px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    transition: border-color 0.2s;
+  }
+  .param-chip:has(.chip-input:focus) {
+    border-color: rgba(110,231,183,0.3);
   }
   .param-chip .chip-label {
     font-size: 11px; color: var(--text3); margin-bottom: 4px;
@@ -222,29 +240,34 @@
   }
 
   .metric-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
+    background: rgba(19,22,30,0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.08);
     border-radius: 16px;
-    padding: 20px;
-    transition: border-color 0.3s;
+    padding: 22px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
   }
   .metric-card.highlight {
-    border-color: rgba(110,231,183,0.3);
-    background: linear-gradient(135deg, var(--bg2) 0%, rgba(110,231,183,0.04) 100%);
+    border-color: rgba(110,231,183,0.25);
+    background: linear-gradient(135deg, rgba(19,22,30,0.9) 0%, rgba(110,231,183,0.07) 100%);
+    box-shadow: 0 0 0 1px rgba(110,231,183,0.1), 0 4px 32px rgba(110,231,183,0.08), 0 2px 16px rgba(0,0,0,0.35);
   }
   .metric-card.highlight-gold {
-    border-color: rgba(251,191,36,0.3);
-    background: linear-gradient(135deg, var(--bg2) 0%, rgba(251,191,36,0.04) 100%);
+    border-color: rgba(251,191,36,0.25);
+    background: linear-gradient(135deg, rgba(19,22,30,0.9) 0%, rgba(251,191,36,0.07) 100%);
+    box-shadow: 0 0 0 1px rgba(251,191,36,0.1), 0 4px 32px rgba(251,191,36,0.08), 0 2px 16px rgba(0,0,0,0.35);
   }
 
   .metric-label {
-    font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--text3); margin-bottom: 10px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text3); margin-bottom: 12px;
   }
 
   .metric-value {
     font-family: 'DM Serif Display', serif;
-    font-size: 32px; line-height: 1;
+    font-size: 36px; line-height: 1;
     color: var(--text);
   }
   .metric-value.accent { color: var(--accent); }
@@ -257,10 +280,13 @@
   }
 
   .chart-panel {
-    background: var(--bg2);
-    border: 1px solid var(--border);
+    background: rgba(19,22,30,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.08);
     border-radius: 20px;
     padding: 28px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04);
   }
 
   .chart-header {
@@ -280,19 +306,23 @@
     font-size: 12px; color: var(--text3);
   }
   .legend-dot {
-    width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0;
+    width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0;
+    box-shadow: 0 0 6px currentColor;
   }
 
   .chart-wrap {
-    position: relative; height: 320px;
+    position: relative; height: 380px;
   }
 
   .if-banner {
-    background: linear-gradient(135deg, var(--accent-dim) 0%, var(--gold-dim) 100%);
-    border: 1px solid rgba(110,231,183,0.2);
+    background: linear-gradient(135deg, rgba(110,231,183,0.08) 0%, rgba(251,191,36,0.06) 100%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(110,231,183,0.18);
     border-radius: 16px;
     padding: 20px 24px;
     display: flex; flex-direction: column; gap: 10px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
   }
 
   .scenarios-banner {
@@ -300,39 +330,39 @@
   }
 
   .sc-col {
-    background: var(--bg3); border: 1px solid var(--border);
-    border-radius: 12px; padding: 14px 10px; text-align: center;
-    cursor: pointer; transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    background: rgba(26,30,42,0.9); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 10px; text-align: center;
+    cursor: pointer; transition: border-color 0.2s, background 0.2s, box-shadow 0.2s, transform 0.15s;
   }
-  .sc-col:hover { border-color: var(--border2); }
+  .sc-col:hover { border-color: var(--border2); transform: translateY(-1px); }
   .sc-col.sc-selected-0 {
-    border-color: rgba(248,113,113,0.5);
-    background: linear-gradient(135deg, var(--bg3) 0%, rgba(248,113,113,0.08) 100%);
-    box-shadow: 0 0 0 1px rgba(248,113,113,0.15);
+    border-color: rgba(248,113,113,0.45);
+    background: linear-gradient(160deg, rgba(26,30,42,0.95) 0%, rgba(248,113,113,0.1) 100%);
+    box-shadow: 0 0 24px rgba(248,113,113,0.12), 0 0 0 1px rgba(248,113,113,0.2);
   }
   .sc-col.sc-selected-1 {
     border-color: rgba(251,191,36,0.4);
-    background: linear-gradient(135deg, var(--bg3) 0%, rgba(251,191,36,0.08) 100%);
-    box-shadow: 0 0 0 1px rgba(251,191,36,0.15);
+    background: linear-gradient(160deg, rgba(26,30,42,0.95) 0%, rgba(251,191,36,0.1) 100%);
+    box-shadow: 0 0 24px rgba(251,191,36,0.12), 0 0 0 1px rgba(251,191,36,0.18);
   }
   .sc-col.sc-selected-2 {
     border-color: rgba(110,231,183,0.4);
-    background: linear-gradient(135deg, var(--bg3) 0%, rgba(110,231,183,0.08) 100%);
-    box-shadow: 0 0 0 1px rgba(110,231,183,0.15);
+    background: linear-gradient(160deg, rgba(26,30,42,0.95) 0%, rgba(110,231,183,0.1) 100%);
+    box-shadow: 0 0 24px rgba(110,231,183,0.12), 0 0 0 1px rgba(110,231,183,0.18);
   }
-  .sc-col-emoji { font-size: 18px; margin-bottom: 5px; }
+  .sc-col-emoji { font-size: 20px; margin-bottom: 6px; }
   .sc-col-label {
     font-size: 10px; color: var(--text3); text-transform: uppercase;
-    letter-spacing: 0.1em; font-weight: 600; margin-bottom: 7px;
+    letter-spacing: 0.1em; font-weight: 600; margin-bottom: 8px;
   }
   .sc-col-age {
-    font-family: 'DM Serif Display', serif; font-size: 24px; line-height: 1;
+    font-family: 'DM Serif Display', serif; font-size: 26px; line-height: 1;
   }
   .sc-col-age.red { color: var(--red); }
   .sc-col-age.gold { color: var(--gold); }
   .sc-col-age.green { color: var(--accent); }
-  .sc-col-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
-  .sc-col-coast { font-size: 10px; color: var(--text3); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+  .sc-col-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
+  .sc-col-coast { font-size: 11px; color: var(--text3); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
   .sc-col-coast span { color: var(--accent2); font-weight: 600; }
   .if-note { font-size: 12px; color: var(--text2); }
 
@@ -344,8 +374,9 @@
   }
 
   .bk-item {
-    background: var(--bg3); border-radius: 12px; padding: 16px;
+    background: rgba(26,30,42,0.8); border-radius: 12px; padding: 16px;
     border-left: 3px solid transparent;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 2px 8px rgba(0,0,0,0.2);
   }
   .bk-item.inv { border-left-color: var(--blue); }
   .bk-item.ret { border-left-color: var(--gold); }
@@ -385,12 +416,13 @@
 <div class="noise"></div>
 <div class="glow-orb g1"></div>
 <div class="glow-orb g2"></div>
+<div class="glow-orb g3"></div>
 
 <div class="container">
   <header class="fade-up">
     <div class="header-label">Planificación financiera</div>
     <h1>Tu camino hacia la<br><em>independencia</em></h1>
-    <p class="header-sub">Calcula cuándo podrás dejar de trabajar y vivir de tus rentas invirtiendo.</p>
+    <p class="header-sub">Calcula cuándo podrás dejar de trabajar y vivir de tus rentas.</p>
   </header>
 
   <div class="grid-main">
@@ -894,17 +926,46 @@
     lastScenarioResults = scenarioResults;
     lastCalcParams = { colchonAmount, rentaMes, edad, INFLATION, TER };
     updateMetrics(scenarioResults[selectedSc], colchonAmount, rentaMes, edad, INFLATION, TER);
-    drawChart(labels, scenarioResults, dataAportado, scenarioResults[selectedSc].capNec);
+    drawChart(labels, scenarioResults, dataAportado, scenarioResults[selectedSc].capNec, selectedSc);
   }
 
-  function drawChart(labels, scenarios, dataAportado, capitalNecesario) {
+  function drawChart(labels, scenarios, dataAportado, capitalNecesario, selIdx) {
     if (chart) chart.destroy();
-    const ctx = document.getElementById('myChart').getContext('2d');
+    const canvas = document.getElementById('myChart');
+    const ctx = canvas.getContext('2d');
+    const h = canvas.offsetHeight || 320;
+
+    function makeGradient(color) {
+      const g = ctx.createLinearGradient(0, 0, 0, h);
+      g.addColorStop(0, color + '30');
+      g.addColorStop(1, color + '00');
+      return g;
+    }
+
+    function pointRadii(data, edadIF) {
+      if (!edadIF) return 0;
+      return data.map((_, i) => labels[i] === 'Edad ' + edadIF ? 5 : 0);
+    }
 
     const ifLinePlugin = {
       id: 'ifLine',
       afterDraw(c) {
         const xScale = c.scales.x, yScale = c.scales.y, cx = c.ctx;
+
+        // Zona sombreada desde IF del escenario activo hasta el borde derecho
+        const sel = scenarios[selIdx];
+        if (sel && sel.edadIF) {
+          const xi = labels.indexOf('Edad ' + sel.edadIF);
+          if (xi !== -1) {
+            const xp = xScale.getPixelForValue(xi);
+            cx.save();
+            cx.fillStyle = sel.color + '08';
+            cx.fillRect(xp, yScale.top, xScale.right - xp, yScale.bottom - yScale.top);
+            cx.restore();
+          }
+        }
+
+        // Línea horizontal de capital necesario
         const yT = yScale.getPixelForValue(capitalNecesario);
         if (yT >= yScale.top && yT <= yScale.bottom) {
           cx.save();
@@ -914,6 +975,8 @@
           cx.beginPath(); cx.moveTo(xScale.left, yT); cx.lineTo(xScale.right, yT); cx.stroke();
           cx.restore();
         }
+
+        // Líneas verticales IF + etiquetas
         scenarios.forEach(sc => {
           if (!sc.edadIF) return;
           const xi = labels.indexOf('Edad ' + sc.edadIF);
@@ -921,49 +984,129 @@
           const xp = xScale.getPixelForValue(xi);
           cx.save();
           cx.setLineDash([5, 4]);
-          cx.strokeStyle = sc.color + '77';
+          cx.strokeStyle = sc.color + '88';
           cx.lineWidth = 1.5;
           cx.beginPath(); cx.moveTo(xp, yScale.top); cx.lineTo(xp, yScale.bottom); cx.stroke();
           cx.fillStyle = sc.color;
-          cx.font = '10px Outfit, sans-serif';
+          cx.font = '600 12px Outfit, sans-serif';
           cx.textAlign = 'center';
-          cx.fillText('IF ' + sc.edadIF, xp, yScale.top - 5);
+          const label = 'IF ' + sc.edadIF;
+          const tw = cx.measureText(label).width;
+          cx.fillStyle = 'rgba(13,15,20,0.7)';
+          cx.fillRect(xp - tw / 2 - 4, yScale.top - 18, tw + 8, 16);
+          cx.fillStyle = sc.color;
+          cx.fillText(label, xp, yScale.top - 5);
           cx.restore();
         });
       }
     };
 
+    const crosshairPlugin = {
+      id: 'crosshair',
+      afterDraw(c) {
+        if (!c.tooltip._active || !c.tooltip._active.length) return;
+        const x = c.tooltip._active[0].element.x;
+        const { top, bottom } = c.scales.y;
+        const cx = c.ctx;
+        cx.save();
+        cx.setLineDash([3, 3]);
+        cx.strokeStyle = 'rgba(255,255,255,0.15)';
+        cx.lineWidth = 1;
+        cx.beginPath(); cx.moveTo(x, top); cx.lineTo(x, bottom); cx.stroke();
+        cx.restore();
+      }
+    };
+
+    const fmtTip = v => '€' + Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
     chart = new Chart(ctx, {
       type: 'line',
-      plugins: [ifLinePlugin],
+      plugins: [ifLinePlugin, crosshairPlugin],
       data: {
         labels,
         datasets: [
-          { label: 'Pesimista (' + scenarios[0].label + ')', data: scenarios[0].chartData, borderColor: scenarios[0].color, backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.3, order: 3 },
-          { label: 'Base ('      + scenarios[1].label + ')', data: scenarios[1].chartData, borderColor: scenarios[1].color, backgroundColor: 'transparent', borderWidth: 2.5, pointRadius: 0, tension: 0.3, order: 2 },
-          { label: 'Optimista (' + scenarios[2].label + ')', data: scenarios[2].chartData, borderColor: scenarios[2].color, backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.3, order: 1 },
-          { label: 'Capital aportado', data: dataAportado, borderColor: 'rgba(96,165,250,0.5)', backgroundColor: 'rgba(96,165,250,0.05)', borderWidth: 1.5, pointRadius: 0, fill: true, tension: 0.3, order: 4 },
+          {
+            label: 'Pesimista (' + scenarios[0].label + ')',
+            data: scenarios[0].chartData,
+            borderColor: scenarios[0].color,
+            backgroundColor: selIdx === 0 ? makeGradient(scenarios[0].color) : 'transparent',
+            fill: selIdx === 0,
+            borderWidth: selIdx === 0 ? 2.5 : 1.5,
+            pointRadius: pointRadii(scenarios[0].chartData, scenarios[0].edadIF),
+            pointBackgroundColor: scenarios[0].color,
+            pointBorderColor: '#0d0f14',
+            pointBorderWidth: 2,
+            tension: 0.3, order: 3,
+          },
+          {
+            label: 'Base (' + scenarios[1].label + ')',
+            data: scenarios[1].chartData,
+            borderColor: scenarios[1].color,
+            backgroundColor: selIdx === 1 ? makeGradient(scenarios[1].color) : 'transparent',
+            fill: selIdx === 1,
+            borderWidth: selIdx === 1 ? 2.5 : 1.5,
+            pointRadius: pointRadii(scenarios[1].chartData, scenarios[1].edadIF),
+            pointBackgroundColor: scenarios[1].color,
+            pointBorderColor: '#0d0f14',
+            pointBorderWidth: 2,
+            tension: 0.3, order: 2,
+          },
+          {
+            label: 'Optimista (' + scenarios[2].label + ')',
+            data: scenarios[2].chartData,
+            borderColor: scenarios[2].color,
+            backgroundColor: selIdx === 2 ? makeGradient(scenarios[2].color) : 'transparent',
+            fill: selIdx === 2,
+            borderWidth: selIdx === 2 ? 2.5 : 1.5,
+            pointRadius: pointRadii(scenarios[2].chartData, scenarios[2].edadIF),
+            pointBackgroundColor: scenarios[2].color,
+            pointBorderColor: '#0d0f14',
+            pointBorderWidth: 2,
+            tension: 0.3, order: 1,
+          },
+          {
+            label: 'Capital aportado',
+            data: dataAportado,
+            borderColor: 'rgba(96,165,250,0.5)',
+            backgroundColor: 'rgba(96,165,250,0.05)',
+            borderWidth: 1.5, pointRadius: 0, fill: true, tension: 0.3, order: 4,
+          },
         ]
       },
       options: {
         responsive: true, maintainAspectRatio: false,
+        animation: { duration: 200 },
+        layout: { padding: { top: 24 } },
         interaction: { mode: 'index', intersect: false },
         plugins: {
           legend: { display: false },
           tooltip: {
             backgroundColor: '#1a1e2a', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1,
             titleColor: '#f0f1f5', bodyColor: '#8a8fa8', padding: 12,
-            callbacks: { label: ctx => ' ' + ctx.dataset.label + ': €' + Math.round(ctx.parsed.y).toLocaleString('es-ES') }
+            callbacks: { label: c => ' ' + c.dataset.label + ': ' + fmtTip(c.parsed.y) }
           }
         },
         scales: {
           x: {
             grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
-            ticks: { color: '#5a5f78', font: { family: 'Outfit', size: 11 }, maxRotation: 45, callback: function(val, i) { return i % 2 === 0 ? this.getLabelForValue(val).replace('Edad ', '') : ''; } }
+            ticks: {
+              color: '#5a5f78', font: { family: 'Outfit', size: 11 }, maxRotation: 0,
+              callback: function(val, i) {
+                const age = parseInt(this.getLabelForValue(val).replace('Edad ', ''));
+                return age % 5 === 0 ? age : '';
+              }
+            }
           },
           y: {
             grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
-            ticks: { color: '#5a5f78', font: { family: 'DM Mono', size: 11 }, callback: v => { if (v >= 1000000) return '€' + (v/1000000).toFixed(1) + 'M'; if (v >= 1000) return '€' + (v/1000).toFixed(0) + 'k'; return '€' + v; } }
+            ticks: {
+              color: '#5a5f78', font: { family: 'DM Mono', size: 11 },
+              callback: v => {
+                if (v >= 1000000) return '€' + (v/1000000).toFixed(1) + 'M';
+                if (v >= 1000) return '€' + (v/1000).toFixed(0) + 'k';
+                return '€' + v;
+              }
+            }
           }
         }
       }
