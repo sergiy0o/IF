@@ -517,6 +517,7 @@
             </div>
             <span class="field-unit">/mes</span>
           </div>
+          <button id="copy-ingreso-btn" class="coast-apply" style="display:none" onclick="copyIngresoToRenta()">= Usar mi ingreso mensual neto</button>
         </div>
 
         <div class="divider"></div>
@@ -966,8 +967,11 @@
       hintEl.classList.remove('visible');
     }
 
-    // Tasa de ahorro
+    // Botón copiar ingreso a renta
     const ingreso = parseN('ingreso');
+    document.getElementById('copy-ingreso-btn').style.display = ingreso > 0 ? 'block' : 'none';
+
+    // Tasa de ahorro
     const tasaEl = document.getElementById('tasa-hint');
     if (ingreso > 0 && aportaMes > 0) {
       const tasa = (aportaMes / ingreso * 100).toFixed(1);
@@ -1183,6 +1187,14 @@
       calcular();
     });
   });
+
+  function copyIngresoToRenta() {
+    const ingreso = parseN('ingreso');
+    if (!ingreso) return;
+    const rentaEl = document.getElementById('renta');
+    rentaEl.value = String(Math.round(ingreso)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    calcular();
+  }
 
   calcular();
 </script>
