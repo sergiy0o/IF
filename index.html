@@ -963,7 +963,8 @@
     const selRes = scenarioResults[selectedSc];
     const hintN  = (retireAge - edad) * 12;
     if (hintN > 0 && (!selRes.edadIF || selRes.edadIF > retireAge)) {
-      const hintR = (selRes.gross - INFLATION - TER) / 12;
+      const hintRAnual = (1 + selRes.gross - TER) / (1 + INFLATION) - 1;
+      const hintR = Math.pow(1 + hintRAnual, 1 / 12) - 1;
       const hintF = Math.pow(1 + hintR, hintN);
       const fvPV  = capital0 * hintF;
       if (fvPV >= selRes.capNec) {
