@@ -973,7 +973,8 @@
         const pmt  = hintR > 0 ? (selRes.capNec - fvPV) * hintR / (hintF - 1) : (selRes.capNec - fvPV) / hintN;
         const diff = Math.round(pmt) - aportaMes;
         const extra = diff > 50 ? ' · <span class="hint-diff">+' + fmt(diff) + '/mes</span>' : '';
-        hintEl.innerHTML = 'Para IF a los ' + retireAge + ': <span class="hint-val">' + fmt(Math.round(pmt)) + '/mes</span>' + extra;
+        const pmtRound = Math.round(pmt);
+        hintEl.innerHTML = 'Para IF a los ' + retireAge + ': <span class="hint-val" style="cursor:pointer;text-decoration:underline dotted" title="Clic para aplicar" onclick="applyHintPmt(' + pmtRound + ')">' + fmt(pmtRound) + '/mes</span>' + extra;
       }
       hintEl.classList.add('visible');
     } else {
@@ -1201,6 +1202,12 @@
       calcular();
     });
   });
+
+  function applyHintPmt(pmt) {
+    const el = document.getElementById('aportacion');
+    el.value = String(pmt).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    calcular();
+  }
 
   function copyIngresoToRenta() {
     const ingreso = parseN('ingreso');
