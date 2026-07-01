@@ -635,9 +635,9 @@
             <div class="chip-value" id="ret-neta-chip">7.94%</div>
           </div>
           <div class="param-chip">
-            <div class="chip-label">Tasa de retirada segura</div>
+            <div class="chip-label">Tasa de retiro</div>
             <div class="chip-row">
-              <input type="number" id="p-wr" class="chip-input" value="3.5" min="1" max="10" step="0.1">
+              <input type="number" id="p-wr" class="chip-input" value="4" min="1" max="10" step="0.1">
               <span class="chip-unit">% anual</span>
             </div>
           </div>
@@ -704,7 +704,7 @@
         <div class="metric-card highlight-gold">
           <div class="metric-label">Capital necesario</div>
           <div class="metric-value gold" id="m-capital-if">—</div>
-          <div class="metric-sub">para renta 3.5%</div>
+          <div class="metric-sub" id="m-capital-sub">para tasa 3.5%</div>
         </div>
         <div class="metric-card">
           <div class="metric-label">Renta mensual IF</div>
@@ -846,7 +846,7 @@
     calcular();
   }
 
-  function updateMetrics(res, rentaMes, edad, INFLATION, TER) {
+  function updateMetrics(res, rentaMes, edad, INFLATION, TER, WR) {
     document.getElementById('ret-neta-chip').textContent = (((1 + res.gross - TER) / (1 + INFLATION) - 1) * 100).toFixed(2) + '%';
 
     if (res.edadIF) {
@@ -870,6 +870,7 @@
     document.getElementById('m-años').textContent = años !== null
       ? años + ' años · escenario ' + res.label : 'fuera de rango';
     document.getElementById('m-capital-if').textContent = res.edadIF ? fmt(res.capNec) : '—';
+    document.getElementById('m-capital-sub').textContent = 'para tasa ' + (WR * 100).toFixed(1) + '%';
     document.getElementById('m-renta-if').textContent = fmt(rentaMes) + '/mes';
     document.getElementById('m-total-aportado').textContent = res.edadIF ? fmt(res.totalAportadoEnIF) : '—';
     const mult = res.totalInvertido > 0 ? (res.capitalEnIF / res.totalInvertido).toFixed(1) : '—';
@@ -897,7 +898,7 @@
     const activeRate = (parseFloat(document.getElementById('p-ret').value)  || 8)    / 100;
     const INFLATION  = (parseFloat(document.getElementById('p-inf').value)  || 2)    / 100;
     const TER        = (parseFloat(document.getElementById('p-ter').value)  || 0.06) / 100;
-    const WR         = (parseFloat(document.getElementById('p-wr').value)   || 3.5)  / 100;
+    const WR         = (parseFloat(document.getElementById('p-wr').value)   || 4)  / 100;
     const _ir        = document.getElementById('p-irpf').value.trim();
     const flatIRPF   = (_ir === '' || +_ir === 0) ? 0 : +_ir / 100;
 
@@ -928,31 +929,21 @@
       const rAnualReal = (1 + sc.gross - TER) / (1 + INFLATION) - 1;
       const rMes = Math.pow(1 + rAnualReal, 1 / 12) - 1;
 
-      function simIF(capNec) {
-        let cap = capital0, costB = capital0;
-        for (let a = edad; a <= MAX_AGE; a++) {
-          if (a > edad) {
-            for (let m = 0; m < 12; m++) cap = cap * (1 + rMes) + aportaMes;
-            costB += aportaMes * 12;
-          }
-          if (cap >= capNec) return { cap, costB };
-        }
-        return null;
-      }
-
-      let gf = 0.68;
-      let capNec = grossWithdrawal(rentaAnual, gf, flatIRPF) / WR;
-      const r1 = simIF(capNec);
-      if (r1) {
-        gf = Math.max(0, (r1.cap - r1.costB) / r1.cap);
-        capNec = grossWithdrawal(rentaAnual, gf, flatIRPF) / WR;
-      }
-
       const rAnual = Math.pow(1 + rMes, 12) - 1;
+
+      // capNec estimado para mostrar cuando no se alcanza la IF (basado en proyección a retireAge)
+      const projYearsRef = Math.max(1, retireAge - edad);
+      const projFRef = Math.pow(1 + rAnual, projYearsRef);
+      const projCapRef = capital0 * projFRef + (rAnual > 0 ? aportaMes * 12 * (projFRef - 1) / rAnual : aportaMes * 12 * projYearsRef);
+      const projCBRef  = capital0 + aportaMes * 12 * projYearsRef;
+      const projGfRef  = projCapRef > 0 ? Math.max(0, (projCapRef - projCBRef) / projCapRef) : 0.68;
+      const capNecRef  = grossWithdrawal(rentaAnual, projGfRef, flatIRPF) / WR;
+
       const chartData = [], chartAportado = [];
       const initialCostBasis = coastBasisOverride !== null ? coastBasisOverride : capital0;
       let capital = capital0, totalAportado = 0, costBasis = initialCostBasis;
       let ifFound = false, edadIF = null, capitalEnIF = 0, totalAportadoEnIF = 0, costBasisEnIF = capital0;
+      let capNecAtIF = 0;
       let retiros65 = 0, coastEdad = null, coastCapital = null, coastCostBasis = null;
 
       for (let a = edad; a <= MAX_AGE; a++) {
@@ -962,6 +953,10 @@
             totalAportado += aportaMes * 12;
             costBasis += aportaMes * 12;
           }
+          // capNec calculado dinámicamente con el costBasis real de este año
+          const gfNow    = capital > 0 ? Math.max(0, (capital - costBasis) / capital) : 0;
+          const capNecNow = grossWithdrawal(rentaAnual, gfNow, flatIRPF) / WR;
+
           if (!coastEdad) {
             const projYears  = Math.max(0, retireAge - a);
             const projCap    = capital * Math.pow(1 + rAnual, projYears);
@@ -971,8 +966,8 @@
           }
           chartData.push(Math.round(capital));
           chartAportado.push(Math.round(totalAportado));
-          if (capital >= capNec) {
-            ifFound = true; edadIF = a;
+          if (capital >= capNecNow) {
+            ifFound = true; edadIF = a; capNecAtIF = capNecNow;
             capitalEnIF = capital; totalAportadoEnIF = totalAportado; costBasisEnIF = costBasis;
           }
         } else {
@@ -994,7 +989,7 @@
       if (idx === 1) dataAportado = chartAportado;
       scenarioResults.push({
         ...sc, flatIRPF, edadIF, coastEdad, coastCapital, coastCostBasis, capitalEnIF, totalAportadoEnIF, costBasisEnIF,
-        capNec,
+        capNec: capNecAtIF || capNecRef,
         chartData, retiros65,
         terminalValue: chartData[chartData.length - 1],
         ganancia: edadIF ? capitalEnIF - capital0 - totalAportadoEnIF : 0,
@@ -1033,7 +1028,7 @@
 
     lastScenarioResults = scenarioResults;
     lastCalcParams = { rentaMes, edad, INFLATION, TER };
-    updateMetrics(scenarioResults[selectedSc], rentaMes, edad, INFLATION, TER);
+    updateMetrics(scenarioResults[selectedSc], rentaMes, edad, INFLATION, TER, WR);
 
     // Hint: required monthly contribution to reach IF by retireAge
     const hintEl = document.getElementById('aportacion-hint');
@@ -1044,10 +1039,15 @@
       const hintR = Math.pow(1 + hintRAnual, 1 / 12) - 1;
       const hintF = Math.pow(1 + hintR, hintN);
       const fvPV  = capital0 * hintF;
-      if (fvPV >= selRes.capNec) {
+      // Proyectar capNec al retireAge (gf basado en capital proyectado sin aportación extra)
+      const projCostBasis = capital0 + aportaMes * 12 * (retireAge - edad);
+      const projCapAll = fvPV + aportaMes * (hintF - 1) / hintR;
+      const projGfHint = projCapAll > 0 ? Math.max(0, (projCapAll - projCostBasis) / projCapAll) : 0.68;
+      const hintCapNec = grossWithdrawal(rentaAnual, projGfHint, flatIRPF) / WR;
+      if (fvPV >= hintCapNec) {
         hintEl.innerHTML = 'Sin aportar ya alcanzas los ' + retireAge + ' (costear)';
       } else {
-        const pmt  = hintR > 0 ? (selRes.capNec - fvPV) * hintR / (hintF - 1) : (selRes.capNec - fvPV) / hintN;
+        const pmt  = hintR > 0 ? (hintCapNec - fvPV) * hintR / (hintF - 1) : (hintCapNec - fvPV) / hintN;
         const diff = Math.round(pmt) - aportaMes;
         const extra = diff > 50 ? ' · <span class="hint-diff">+' + fmt(diff) + '/mes</span>' : '';
         const pmtRound = Math.round(pmt);
